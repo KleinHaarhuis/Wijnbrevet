@@ -132,6 +132,9 @@ textarea{width:100%;min-height:110px;font:inherit;font-size:.82rem;color:var(--i
 .mapctl button{width:42px;height:42px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:1.3rem;font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.15)}
 .map text.sub{fill:var(--gold);font-style:italic}
 .map .dot.soil{fill:var(--leaf)}
+.map .grp text{font-weight:600}.map .grp.link{cursor:pointer}.map .grp.link text{fill:var(--accent);text-decoration:underline}
+.map .grp .gw{fill:var(--gold);stroke:var(--surface);stroke-width:1px;vector-effect:non-scaling-stroke}.map .grp .gb{fill:#4b2a52;stroke:var(--surface);stroke-width:1px;vector-effect:non-scaling-stroke}
+.map .grp.link text,.map .grp.link circle{pointer-events:all}
 .map .reg{fill:var(--accent);fill-opacity:.3;stroke:var(--accent);stroke-width:2;vector-effect:non-scaling-stroke;stroke-linejoin:round}
 .map .reg.sel{fill-opacity:.6}
 .map .reg.q{fill:var(--ink);fill-opacity:.2;stroke:var(--ink)}
@@ -690,10 +693,16 @@ Mosel:[["Mittelmosel",49.97,7.0,"b"],["Ruwer",49.79,6.74,"b"],["Saar",49.62,6.57
 Nahe:[["Bad Kreuznach",49.844,7.867,"t"],["Rotenfels",49.82,7.84,"t"]],
 Rheingau:[["Assmannshausen",49.99,7.86,"t"],["Rüdesheim",49.98,7.925,"t"],["Geisenheim",49.985,7.967,"t"],["Johannisberg",50.0,7.98,"t"],["Kloster Eberbach",50.044,8.047,"t"],["Wiesbaden",50.082,8.24,"t"]],
 Rheinhessen:[["Bingen",49.966,7.9,"t"],["Mainz",49.993,8.247,"t"],["Nackenheim",49.915,8.338,"t"],["Nierstein (Roter Hang)",49.87,8.336,"t"],["Worms",49.632,8.359,"t"]],
-Pfalz:[["Mittelhaardt",49.45,8.08,"b"],["Südliche Weinstrasse",49.17,8.03,"b"],["Forst",49.425,8.19,"t"],["Deidesheim",49.407,8.185,"t"],["Neustadt",49.354,8.139,"t"]],
+Pfalz:[["Mittelhaardt",49.45,8.08,"b"],["Südliche Weinstrasse",49.1,8.0,"b"],["Forst",49.425,8.19,"t"],["Deidesheim",49.407,8.185,"t"],["Neustadt",49.354,8.139,"t"]],
 Baden:[["Kaiserstuhl",48.09,7.66,"t"],["Freiburg",47.995,7.85,"t"],["Baden-Baden",48.762,8.24,"t"],["Karlsruhe",49.006,8.403,"t"]],
 Franken:[["Würzburg (Würzburger Stein)",49.80,9.925,"t"]]
 };
+// Belangrijkste druiven per gebied volgens het boek (p. 158-163); b = blauw. Getoond als je inzoomt.
+const RDR={Ahr:[["spätburgunder","b"]],Mosel:[["riesling"]],Nahe:[["riesling"]],Rheingau:[["riesling"],["spätburgunder","b"]],
+Rheinhessen:[["riesling"],["müller-thurgau"],["silvaner"],["dornfelder","b"]],Pfalz:[["riesling"],["dornfelder","b"],["spätburgunder","b"]],
+Baden:[["spätburgunder","b"],["weissburgunder"],["grauburgunder"]],Franken:[["silvaner"],["müller-thurgau"],["riesling"]]};
+// Druif op de kaart -> druivenpagina, ook via synoniem (spätburgunder = pinot noir).
+const grapeOf=n=>G.find(g=>g.n.toLowerCase()===n||g.syn.some(x=>x.toLowerCase()===n));
 const ZMIN=4.5,ZMAX=13,ZPLACES=7.5;
 // Kleine, dicht op elkaar liggende gebieden tonen hun plaatsen pas verder ingezoomd.
 const PLZ={Rheingau:9,Rheinhessen:8.7,Nahe:8.7,Pfalz:8.2};
@@ -721,6 +730,9 @@ function mapSVG(){
   if(deep)for(const r of D.regions)for(const d of PL[r.n]||[]){if(d[3]==="t"&&geo.z<(PLZ[r.n]||ZPLACES))continue;if(d[3]==="b"){o+=txt(d[1],d[2],d[0],11,"sub")}else{const [x,y]=P(d[1],d[2]);o+=`<circle class="dot" cx="${f(x)}" cy="${f(y)}" r="${f(3.5*s)}"/>`+txt(d[1],d[2],d[0],10,"",14)}}
   for(const r of D.regions){if(q&&q.wrong!==r.n)continue;const c=LAB[r.n]||mid(r);o+=txt(c[0],c[1],r.n,deep?13:11,"reglab",4)}
   for(const r of D.regions)o+=`<polygon class="hit" data-act="g-region" data-n="${r.n}" points="${pts(r.poly)}"/>`;
+  if(deep&&!q)for(const r of D.regions){const c=LAB[r.n]||mid(r),[x,y]=P(c[0],c[1]),list=RDR[r.n]||[];
+    list.forEach((d,i)=>{const g=grapeOf(d[0]),yy=y+(19+i*13)*s;
+      o+=`<g class="grp${g?" link":""}"${g?` data-act="g-grape" data-n="${h(g.n)}"`:""}><circle cx="${f(x-4*s-d[0].length*2.6*s)}" cy="${f(yy-3.3*s)}" r="${f(3.6*s)}" class="${d[1]?"gb":"gw"}"/><text x="${f(x)}" y="${f(yy)}" font-size="${f(10*s)}" stroke-width="${f(3*s)}" text-anchor="middle">${h(d[0])}</text></g>`})}
   return o+"</svg>";
 }
 // Schuiven, knijpen, scrollen en dubbeltikken. Tijdens het gebaar schuift en schaalt de tekening; daarna wordt hij scherp opnieuw opgebouwd.
@@ -786,7 +798,7 @@ function vGeo(){
   ${q?(q.i<n?`<p class="note"><strong>Tik op: ${h(q.order[q.i])}</strong> <span class="muted">(${q.i+1} van ${n})</span>${q.wrong?`<br>Dat is ${h(q.wrong)}. Probeer het nog eens.`:""}</p>`:`<p class="note"><strong>${q.good} van de ${n} in één keer goed.</strong></p>`):""}
   <div class="mapwrap" id="mapwrap">${mapSVG()}<div class="mapctl"><button data-act="g-plus" aria-label="Inzoomen">+</button><button data-act="g-minus" aria-label="Uitzoomen">−</button><button data-act="g-home" aria-label="Heel Duitsland">⌂</button></div></div>
   <p class="src" id="tilenote">${h(note)} Gebiedsgrenzen bij benadering.</p>
-  <p class="muted small">Knijp, scroll of dubbeltik om in te zoomen. Ingezoomd verschijnen de deelgebieden en plaatsen uit het boek.</p>
+  <p class="muted small">Knijp, scroll of dubbeltik om in te zoomen. Ingezoomd verschijnen de deelgebieden, plaatsen en belangrijkste druiven uit het boek. Tik op een onderstreepte druif voor zijn pagina.</p>
   <div class="row"><button class="chip" data-act="g-explore" aria-pressed="${!q}">Verkennen</button><button class="chip" data-act="g-quiz" aria-pressed="${!!q}">${q&&q.i>=n?"Opnieuw overhoren":"Overhoor me"}</button></div>
   ${q?"":`${r?`<section class="card"><div class="row between"><h2>${h(r.n)}</h2><button class="chip" data-act="g-zoom">Zoom in</button></div><dl><dt>Druiven</dt><dd>${h(r.druif)}</dd>${r.kleur?`<dt>Aandeel</dt><dd>${h(r.kleur)}</dd>`:""}${r.stijl?`<dt>Wijn</dt><dd>${h(r.stijl)}</dd>`:""}<dt>Wijngaard</dt><dd>${h(r.ha)}</dd></dl><p>${h(r.info)}</p></section>`:`<p class="muted small">Tik op een gebied voor uitleg.</p>`}
   <section class="card"><h3>Wat bepaalt het klimaat?</h3><div class="row">${Object.entries(D.layers).map(([k,l])=>`<button class="chip" data-act="g-layer" data-id="${k}" aria-pressed="${geo.layer===k}">${l[0]}</button>`).join("")}</div>
@@ -847,6 +859,7 @@ view.addEventListener("click",e=>{
   else if(a==="g-explore")geo.quiz=null;
   else if(a==="g-zoom"){const r=GEO[geo.land].regions.find(x=>x.n===geo.sel);if(r){fitBox(regionBox(r));geo.z=Math.max(geo.z,ZPLACES+.2)}try{document.getElementById("mapwrap").scrollIntoView({block:"start",behavior:"smooth"})}catch(e){}}
   else if(a==="g-home")geo.c=null;
+  else if(a==="g-grape"){if(Date.now()-geo.lastMove<450)return;tab="opbouwen";build=null;gview=d.n;try{location.hash=tab}catch(e){}scroll=true}
   else if(a==="g-plus"){zoomBy(2);return}
   else if(a==="g-minus"){zoomBy(.5);return}
   else if(a==="g-sec")geo.sec=d.id;
