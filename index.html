@@ -126,7 +126,12 @@ nav button[aria-current="page"]{color:var(--accent)}
 .src{font-size:.8rem;color:var(--muted)}
 .link{background:none;border:0;padding:6px 0;color:var(--muted);text-decoration:underline;font-size:.86rem;text-align:left;min-height:36px}
 textarea{width:100%;min-height:110px;font:inherit;font-size:.82rem;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px}
-.map{width:100%;display:block;border-radius:12px;background:var(--line);touch-action:manipulation}
+.mapwrap{position:relative;overflow:hidden;border-radius:12px;background:var(--line);aspect-ratio:1/1.15;touch-action:none;user-select:none;-webkit-user-select:none}
+.map{width:100%;height:100%;display:block;transform-origin:0 0}
+.mapctl{position:absolute;right:8px;top:8px;display:flex;flex-direction:column;gap:6px}
+.mapctl button{width:42px;height:42px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:1.3rem;font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.map text.sub{fill:var(--gold);font-style:italic}
+.map .dot.soil{fill:var(--leaf)}
 .map .reg{fill:var(--accent);fill-opacity:.3;stroke:var(--accent);stroke-width:2;vector-effect:non-scaling-stroke;stroke-linejoin:round}
 .map .reg.sel{fill-opacity:.6}
 .map .reg.q{fill:var(--ink);fill-opacity:.2;stroke:var(--ink)}
@@ -666,8 +671,8 @@ const GEO={Duitsland:{box:[47.45,6.1,50.8,10.85],
   },
   sections:[["mosel","Moselhelling"],["rheingau","Rheingau"],["pfalz","Pfalz"]]
 }};
-const LAB={Ahr:[50.68,7.1],Mosel:[50.02,6.7],Nahe:[49.7,7.6],Rheingau:[50.06,8.1],Rheinhessen:[49.76,8.19],Pfalz:[49.32,8.16],Baden:[48.45,8.0],Franken:[49.85,9.9]};
-let geo={land:"Duitsland",zoom:null,sel:null,layer:"riv",quiz:null,prov:0,noTiles:false,credit:false,sec:"mosel"};
+const LAB={Ahr:[50.68,7.1],Mosel:[50.02,6.7],Nahe:[49.7,7.6],Rheingau:[50.06,8.1],Rheinhessen:[49.76,8.19],Pfalz:[49.25,8.17],Baden:[48.45,8.0],Franken:[49.85,9.9]};
+let geo={land:"Duitsland",c:null,z:6,wpx:360,lastMove:0,sel:null,layer:"riv",quiz:null,prov:0,noTiles:false,credit:false,sec:"mosel"};
 function px(lat,lon,z){const n=256*2**z,s=Math.sin(lat*Math.PI/180);return [(lon+180)/360*n,(.5-Math.log((1+s)/(1-s))/(4*Math.PI))*n]}
 function geoView(box){
   let [S,W,N,E]=box;const a=(N-S)*.06,b=(E-W)*.06;S-=a;N+=a;W-=b;E+=b;
@@ -678,27 +683,77 @@ function geoView(box){
     if(nx*ny<=20||z===5)return {z,x0,y0,w,h:hh};
   }
 }
+// Deelgebieden (b) en plaatsen (t) die verschijnen als je inzoomt. Deelgebieden volgens het boek; coördinaten van plaatsen bij benadering.
+const PL={
+Ahr:[["Bad Neuenahr-Ahrweiler",50.545,7.115,"t"]],
+Mosel:[["Mittelmosel",49.97,7.0,"b"],["Ruwer",49.79,6.74,"b"],["Saar",49.62,6.57,"b"],["Trier",49.756,6.641,"t"],["Bernkastel-Kues",49.916,7.073,"t"],["Zell",50.03,7.183,"t"],["Koblenz",50.357,7.594,"t"]],
+Nahe:[["Bad Kreuznach",49.844,7.867,"t"],["Rotenfels",49.82,7.84,"t"]],
+Rheingau:[["Assmannshausen",49.99,7.86,"t"],["Rüdesheim",49.98,7.925,"t"],["Geisenheim",49.985,7.967,"t"],["Johannisberg",50.0,7.98,"t"],["Kloster Eberbach",50.044,8.047,"t"],["Wiesbaden",50.082,8.24,"t"]],
+Rheinhessen:[["Bingen",49.966,7.9,"t"],["Mainz",49.993,8.247,"t"],["Nackenheim",49.915,8.338,"t"],["Nierstein (Roter Hang)",49.87,8.336,"t"],["Worms",49.632,8.359,"t"]],
+Pfalz:[["Mittelhaardt",49.45,8.08,"b"],["Südliche Weinstrasse",49.17,8.03,"b"],["Forst",49.425,8.19,"t"],["Deidesheim",49.407,8.185,"t"],["Neustadt",49.354,8.139,"t"]],
+Baden:[["Kaiserstuhl",48.09,7.66,"t"],["Freiburg",47.995,7.85,"t"],["Baden-Baden",48.762,8.24,"t"],["Karlsruhe",49.006,8.403,"t"]],
+Franken:[["Würzburg (Würzburger Stein)",49.80,9.925,"t"]]
+};
+const ZMIN=4.5,ZMAX=13,ZPLACES=7.5;
+// Kleine, dicht op elkaar liggende gebieden tonen hun plaatsen pas verder ingezoomd.
+const PLZ={Rheingau:9,Rheinhessen:8.7,Nahe:8.7,Pfalz:8.2};
+const clampZ=z=>Math.max(ZMIN,Math.min(ZMAX,z));
+function unpx(x,y,z){const n=256*2**z;return [Math.atan(Math.sinh(Math.PI*(1-2*y/n)))*180/Math.PI,x/n*360-180]}
+function fitBox(box){const W=geo.wpx,H=W*1.15,[x0,y0]=px(box[2],box[1],0),[x1,y1]=px(box[0],box[3],0);geo.z=clampZ(Math.log2(Math.min(W/(x1-x0),H/(y1-y0)))-.05);geo.c=unpx((x0+x1)/2,(y0+y1)/2,0)}
+function regionBox(r){const la=r.poly.map(p=>p[0]),lo=r.poly.map(p=>p[1]),S=Math.min(...la),N=Math.max(...la),W=Math.min(...lo),E=Math.max(...lo),m=Math.max(N-S,E-W)*.2;return [S-m,W-m,N+m,E+m]}
 function mapSVG(){
-  const D=GEO[geo.land],zr=geo.zoom&&D.regions.find(r=>r.n===geo.zoom),q=geo.quiz&&geo.quiz.i<geo.quiz.order.length?geo.quiz:null;
-  let box=D.box;
-  if(zr){const la=zr.poly.map(p=>p[0]),lo=zr.poly.map(p=>p[1]),S=Math.min(...la),N=Math.max(...la),W=Math.min(...lo),E=Math.max(...lo),m=Math.max(N-S,E-W)*.25;box=[S-m,W-m,N+m,E+m]}
-  const v=geoView(box),z=v.z,s=v.w/360,f=n=>n.toFixed(1),P=(la,lo)=>px(la,lo,z);
+  const D=GEO[geo.land],q=geo.quiz&&geo.quiz.i<geo.quiz.order.length?geo.quiz:null;
+  if(!geo.c)fitBox(D.box);
+  const W=geo.wpx,H=Math.round(W*1.15),z=Math.max(0,Math.min(ZMAX,Math.round(geo.z))),k=2**(geo.z-z),[cx,cy]=px(geo.c[0],geo.c[1],z);
+  const v={x0:cx-W/k/2,y0:cy-H/k/2,w:W/k,h:H/k},s=v.w/W,f=n=>n.toFixed(1),P=(la,lo)=>px(la,lo,z),deep=geo.z>=ZPLACES;
   const pts=a=>a.map(p=>P(p[0],p[1]).map(f).join(",")).join(" ");
   const txt=(la,lo,t,size,cls,dy)=>{const [x,y]=P(la,lo);return `<text x="${f(x)}" y="${f(y+(dy||0)*s)}" font-size="${f(size*s)}" stroke-width="${f(3*s)}" text-anchor="middle" class="${cls||""}">${h(t)}</text>`};
   const mid=r=>[r.poly.reduce((a,p)=>a+p[0],0)/r.poly.length,r.poly.reduce((a,p)=>a+p[1],0)/r.poly.length];
   let o=`<svg class="map" viewBox="${f(v.x0)} ${f(v.y0)} ${f(v.w)} ${f(v.h)}" role="img" aria-label="Kaart van de Duitse wijngebieden">`;
-  if(!geo.noTiles){const T=TILE[geo.prov];for(let ty=Math.floor(v.y0/256);ty<=Math.floor((v.y0+v.h)/256);ty++)for(let tx=Math.floor(v.x0/256);tx<=Math.floor((v.x0+v.w)/256);tx++)o+=`<image href="${T.url(z,tx,ty)}" x="${tx*256}" y="${ty*256}" width="256.5" height="256.5"/>`}
+  if(!geo.noTiles){const T=TILE[geo.prov],max=2**z-1;for(let ty=Math.max(0,Math.floor(v.y0/256));ty<=Math.min(max,Math.floor((v.y0+v.h)/256));ty++)for(let tx=Math.floor(v.x0/256);tx<=Math.floor((v.x0+v.w)/256);tx++)o+=`<image href="${T.url(z,tx,ty)}" x="${tx*256}" y="${ty*256}" width="256.5" height="256.5"/>`}
   if(geo.layer==="berg")for(const m of D.mounts){const [x,y]=P(m[1],m[2]),rx=m[3]/360*256*2**z,ry=Math.abs(P(m[1]+m[4],m[2])[1]-y);o+=`<ellipse class="mount" cx="${f(x)}" cy="${f(y)}" rx="${f(rx)}" ry="${f(ry)}"/>`}
   for(const r of D.regions){const c=q?(q.wrong===r.n?"reg bad":"reg q"):geo.sel===r.n?"reg sel":"reg";o+=`<polygon class="${c}" points="${pts(r.poly)}"/>`}
   if(geo.layer==="riv")for(const r of D.rivers)o+=`<polyline class="river" points="${pts(r.line)}"/>`;
-  if(geo.layer==="lig"){const [x0,y]=P(49,box[1]-3),[x1]=P(49,box[3]+3);o+=`<line class="par" x1="${f(x0)}" y1="${f(y)}" x2="${f(x1)}" y2="${f(y)}"/>`+txt(49,D.box[3]-1.3,"zone A: koel",10,"",-6)+txt(49,D.box[3]-1.3,"zone B: warmer",10,"",15)}
+  if(geo.layer==="lig"){const [x0,y]=P(49,D.box[1]-3),[x1]=P(49,D.box[3]+3);o+=`<line class="par" x1="${f(x0)}" y1="${f(y)}" x2="${f(x1)}" y2="${f(y)}"/>`+txt(49,D.box[3]-1.3,"zone A: koel",10,"",-6)+txt(49,D.box[3]-1.3,"zone B: warmer",10,"",15)}
   if(geo.layer==="berg")for(const m of D.mounts)o+=txt(m[1],m[2],m[0],9.5,"mt",3);
   if(geo.layer==="riv"&&!q)for(const r of D.rivers){if(D.regions.some(x=>x.n===r.n))continue;const p=r.line[r.at];o+=txt(p[0],p[1],r.n,9.5,"rv",-6)}
-  const dots=(geo.layer==="bodem"?D.soil:[]).concat(zr&&!q?zr.places:[]);
-  for(const d of dots){const [x,y]=P(d[1],d[2]);o+=`<circle class="dot" cx="${f(x)}" cy="${f(y)}" r="${f(4*s)}"/>`+txt(d[1],d[2],d[0],9.5,"",15)}
-  for(const r of D.regions){if(q&&q.wrong!==r.n)continue;const c=zr?mid(r):LAB[r.n]||mid(r);o+=txt(c[0],c[1],r.n,zr?13:11,"",zr&&zr.n===r.n?-14:4)}
+  if(geo.layer==="bodem")for(const d of D.soil){const [x,y]=P(d[1],d[2]);o+=`<circle class="dot soil" cx="${f(x)}" cy="${f(y)}" r="${f(4*s)}"/>`+txt(d[1],d[2],d[0],9.5,"mt",-8)}
+  if(deep)for(const r of D.regions)for(const d of PL[r.n]||[]){if(d[3]==="t"&&geo.z<(PLZ[r.n]||ZPLACES))continue;if(d[3]==="b"){o+=txt(d[1],d[2],d[0],11,"sub")}else{const [x,y]=P(d[1],d[2]);o+=`<circle class="dot" cx="${f(x)}" cy="${f(y)}" r="${f(3.5*s)}"/>`+txt(d[1],d[2],d[0],10,"",14)}}
+  for(const r of D.regions){if(q&&q.wrong!==r.n)continue;const c=LAB[r.n]||mid(r);o+=txt(c[0],c[1],r.n,deep?13:11,"reglab",4)}
   for(const r of D.regions)o+=`<polygon class="hit" data-act="g-region" data-n="${r.n}" points="${pts(r.poly)}"/>`;
   return o+"</svg>";
+}
+// Schuiven, knijpen, scrollen en dubbeltikken. Tijdens het gebaar schuift en schaalt de tekening; daarna wordt hij scherp opnieuw opgebouwd.
+function commitMap(T,drag){
+  const W=geo.wpx,H=W*1.15,[cx,cy]=px(geo.c[0],geo.c[1],geo.z),qx=(W/2-T.tx)/T.S,qy=(H/2-T.ty)/T.S;
+  geo.c=unpx(cx+qx-W/2,cy+qy-H/2,geo.z);geo.z=clampZ(geo.z+Math.log2(T.S));if(drag)geo.lastMove=Date.now();render();
+}
+function zoomBy(f,x,y){const W=geo.wpx,H=W*1.15;x=x??W/2;y=y??H/2;commitMap({S:f,tx:x-f*x,ty:y-f*y})}
+function hookMap(){
+  const wrap=document.getElementById("mapwrap");if(!wrap)return;
+  const w=wrap.clientWidth;if(w&&Math.abs(w-geo.wpx)>2){geo.wpx=w;render();return}
+  const svg=wrap.querySelector("svg.map"),pts=new Map();
+  let base={S:1,tx:0,ty:0},cur=base,p0=null,moved=false,lastTap=geo.lastTap||0;
+  const rel=e=>{const r=wrap.getBoundingClientRect();return {x:e.clientX-r.left,y:e.clientY-r.top}};
+  const seg=()=>{base={...cur};p0=[...pts.values()].map(p=>({...p}))};
+  const apply=()=>{svg.style.transform=`translate(${cur.tx}px,${cur.ty}px) scale(${cur.S})`};
+  wrap.addEventListener("pointerdown",e=>{if(e.target.closest(".mapctl"))return;pts.set(e.pointerId,rel(e));if(pts.size===1)moved=false;seg()});
+  wrap.addEventListener("pointermove",e=>{
+    if(!pts.has(e.pointerId))return;pts.set(e.pointerId,rel(e));const a=[...pts.values()];
+    if(a.length===1&&p0.length===1){const dx=a[0].x-p0[0].x,dy=a[0].y-p0[0].y;if(Math.hypot(dx,dy)>6)moved=true;if(moved)cur={S:base.S,tx:base.tx+dx,ty:base.ty+dy}}
+    else if(a.length>=2&&p0.length>=2){moved=true;const d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y),d0=Math.hypot(p0[0].x-p0[1].x,p0[0].y-p0[1].y)||1,sc=d/d0,
+      m={x:(a[0].x+a[1].x)/2,y:(a[0].y+a[1].y)/2},m0={x:(p0[0].x+p0[1].x)/2,y:(p0[0].y+p0[1].y)/2};
+      cur={S:base.S*sc,tx:sc*(base.tx-m0.x)+m.x,ty:sc*(base.ty-m0.y)+m.y}}
+    if(moved)apply();
+  });
+  const up=e=>{
+    if(!pts.has(e.pointerId))return;const p=pts.get(e.pointerId);pts.delete(e.pointerId);
+    if(pts.size){seg();return}
+    if(moved){commitMap(cur,true);return}
+    const now=Date.now(),lp=geo.lastTapP;if(now-lastTap<320&&lp&&Math.hypot(lp.x-p.x,lp.y-p.y)<30){geo.lastTap=0;zoomBy(2,p.x,p.y)}else{lastTap=geo.lastTap=now;geo.lastTapP=p}
+  };
+  wrap.addEventListener("pointerup",up);wrap.addEventListener("pointercancel",up);
+  wrap.addEventListener("wheel",e=>{e.preventDefault();const p=rel(e);zoomBy(e.deltaY<0?Math.SQRT2:Math.SQRT1_2,p.x,p.y)},{passive:false});
 }
 function vines(x0,y0,x1,y1,n){let o="";for(let i=0;i<n;i++){const x=x0+(x1-x0)*i/(n-1),y=y0+(y1-y0)*i/(n-1);o+=`<line class="vine" x1="${x}" y1="${y}" x2="${x}" y2="${y-9}"/>`}return o}
 const AH=`<defs><marker id="ah" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path class="ah" d="M0 0L8 4L0 8z"/></marker></defs>`;
@@ -729,10 +784,11 @@ function vGeo(){
   const sec=section(geo.sec);
   return `<div class="row between"><h2>Duitsland</h2><span class="muted small">Andere landen volgen</span></div>
   ${q?(q.i<n?`<p class="note"><strong>Tik op: ${h(q.order[q.i])}</strong> <span class="muted">(${q.i+1} van ${n})</span>${q.wrong?`<br>Dat is ${h(q.wrong)}. Probeer het nog eens.`:""}</p>`:`<p class="note"><strong>${q.good} van de ${n} in één keer goed.</strong></p>`):""}
-  ${mapSVG()}
+  <div class="mapwrap" id="mapwrap">${mapSVG()}<div class="mapctl"><button data-act="g-plus" aria-label="Inzoomen">+</button><button data-act="g-minus" aria-label="Uitzoomen">−</button><button data-act="g-home" aria-label="Heel Duitsland">⌂</button></div></div>
   <p class="src" id="tilenote">${h(note)} Gebiedsgrenzen bij benadering.</p>
-  <div class="row"><button class="chip" data-act="g-explore" aria-pressed="${!q}">Verkennen</button><button class="chip" data-act="g-quiz" aria-pressed="${!!q}">${q&&q.i>=n?"Opnieuw overhoren":"Overhoor me"}</button>${geo.zoom?`<button class="chip" data-act="g-out">Heel Duitsland</button>`:""}</div>
-  ${q?"":`${r?`<section class="card"><div class="row between"><h2>${h(r.n)}</h2>${geo.zoom===r.n?"":`<button class="chip" data-act="g-zoom">Zoom in</button>`}</div><dl><dt>Druiven</dt><dd>${h(r.druif)}</dd>${r.kleur?`<dt>Aandeel</dt><dd>${h(r.kleur)}</dd>`:""}${r.stijl?`<dt>Wijn</dt><dd>${h(r.stijl)}</dd>`:""}<dt>Wijngaard</dt><dd>${h(r.ha)}</dd></dl><p>${h(r.info)}</p></section>`:`<p class="muted small">Tik op een gebied voor uitleg.</p>`}
+  <p class="muted small">Knijp, scroll of dubbeltik om in te zoomen. Ingezoomd verschijnen de deelgebieden en plaatsen uit het boek.</p>
+  <div class="row"><button class="chip" data-act="g-explore" aria-pressed="${!q}">Verkennen</button><button class="chip" data-act="g-quiz" aria-pressed="${!!q}">${q&&q.i>=n?"Opnieuw overhoren":"Overhoor me"}</button></div>
+  ${q?"":`${r?`<section class="card"><div class="row between"><h2>${h(r.n)}</h2><button class="chip" data-act="g-zoom">Zoom in</button></div><dl><dt>Druiven</dt><dd>${h(r.druif)}</dd>${r.kleur?`<dt>Aandeel</dt><dd>${h(r.kleur)}</dd>`:""}${r.stijl?`<dt>Wijn</dt><dd>${h(r.stijl)}</dd>`:""}<dt>Wijngaard</dt><dd>${h(r.ha)}</dd></dl><p>${h(r.info)}</p></section>`:`<p class="muted small">Tik op een gebied voor uitleg.</p>`}
   <section class="card"><h3>Wat bepaalt het klimaat?</h3><div class="row">${Object.entries(D.layers).map(([k,l])=>`<button class="chip" data-act="g-layer" data-id="${k}" aria-pressed="${geo.layer===k}">${l[0]}</button>`).join("")}</div>
     ${geo.layer?`<p class="note">${h(D.layers[geo.layer][1])}</p>`:""}</section>
   <section class="card"><h3>Doorsneden</h3><div class="row">${D.sections.map(x=>`<button class="chip" data-act="g-sec" data-id="${x[0]}" aria-pressed="${geo.sec===x[0]}">${x[1]}</button>`).join("")}</div>${sec[0]}<p class="small">${h(sec[1])}</p></section>
@@ -749,7 +805,7 @@ function hookTiles(){
 
 function render(){
   view.innerHTML=tab==="start"?vStart():tab==="overhoren"?vQuiz():tab==="opbouwen"?vBuild():tab==="kaart"?vGeo():vTaste();
-  if(tab==="kaart")hookTiles();
+  if(tab==="kaart"){hookTiles();hookMap()}
   if(tab==="opbouwen")hookPlates();
   document.querySelectorAll("nav button").forEach(b=>{if(b.dataset.tab===tab)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});
 }
@@ -785,12 +841,14 @@ view.addEventListener("click",e=>{
   else if(a==="flag-grape"){if(!build.flagged){store.flags.push({q:"Druivenprofiel "+build.g.n,a:"het profiel zoals de app het toont",src:"Boek p. "+build.g.p});save();build.flagged=true;copied=false}}
   else if(a==="copyflags"){try{navigator.clipboard.writeText(flagText()).then(()=>{copied=true;render()}).catch(()=>{const t=document.getElementById("flags");if(t)t.select()})}catch(e){const t=document.getElementById("flags");if(t)t.select()}return}
   else if(a==="clearflags"){store.flags=[];save();copied=false}
-  else if(a==="g-region"){const q=geo.quiz;if(q&&q.i<q.order.length){const ok=d.n===q.order[q.i];if(ok){record({code:"4.3",key:"kaart:"+d.n},q.first);if(q.first)q.good++;q.i++;q.wrong=null;q.first=true}else{q.wrong=d.n;q.first=false}}else if(!q)geo.sel=geo.sel===d.n?null:d.n}
+  else if(a==="g-region"){if(Date.now()-geo.lastMove<450)return;const q=geo.quiz;if(q&&q.i<q.order.length){const ok=d.n===q.order[q.i];if(ok){record({code:"4.3",key:"kaart:"+d.n},q.first);if(q.first)q.good++;q.i++;q.wrong=null;q.first=true}else{q.wrong=d.n;q.first=false}}else if(!q)geo.sel=d.n}
   else if(a==="g-layer")geo.layer=geo.layer===d.id?null:d.id;
-  else if(a==="g-quiz"){geo.quiz={order:shuffle(GEO[geo.land].regions.map(r=>r.n)),i:0,wrong:null,first:true,good:0};geo.zoom=null;geo.sel=null;scroll=true}
+  else if(a==="g-quiz"){geo.quiz={order:shuffle(GEO[geo.land].regions.map(r=>r.n)),i:0,wrong:null,first:true,good:0};geo.c=null;geo.sel=null;scroll=true}
   else if(a==="g-explore")geo.quiz=null;
-  else if(a==="g-zoom")geo.zoom=geo.sel;
-  else if(a==="g-out")geo.zoom=null;
+  else if(a==="g-zoom"){const r=GEO[geo.land].regions.find(x=>x.n===geo.sel);if(r){fitBox(regionBox(r));geo.z=Math.max(geo.z,ZPLACES+.2)}try{document.getElementById("mapwrap").scrollIntoView({block:"start",behavior:"smooth"})}catch(e){}}
+  else if(a==="g-home")geo.c=null;
+  else if(a==="g-plus"){zoomBy(2);return}
+  else if(a==="g-minus"){zoomBy(.5);return}
   else if(a==="g-sec")geo.sec=d.id;
   else if(a==="reset")confirmReset=true;
   else if(a==="reset-no")confirmReset=false;
