@@ -466,7 +466,10 @@ const PLATES={
 "Syrah":["Syrah - Ampélographie.jpg"],
 "Tempranillo":["Tempranillo Viala et Vermorel.jpg"]
 };
-const fileUrl=(f,w)=>"https://commons.wikimedia.org/wiki/Special:FilePath/"+encodeURIComponent(f.replace(/ /g,"_"))+"?width="+w;
+// Rechtstreeks naar de miniatuur op upload.wikimedia.org (standaardmaten 120 en 500), zonder omleiding.
+const MD5={"Pinot blanc Chardonnay - Ampélographie.jpg":"2b4b091ef97e29a6a330f14359baffbf","Chenin blanc - Ampélographie.jpg":"7548487d2de8e3696419a2a56dd33bf5","Gewürztramine Viala et Vermorelr.jpg":"c48d5068511f27df79ab0fff5a9840bd","Melon - Ampélographie.jpg":"a03443923f22238e4b2945f5c54b22d9","Muscat blanc - Ampélographie.jpg":"d311e8bd406006b255755aff8eab1390","Pinot blanc - Ampélographie.jpg":"b56dd3e41a5a69a5380f4beacf83cbfc","Pinot gris - Ampélographie.jpg":"be040f7339fb041ead49c0412d1b68ac","Sauvignon - Ampélographie.jpg":"914915eb7bd0b110d82373a5782ed15c","Ugni blanc (Trebbiano) - Ampélographie.jpg":"2b5c1ea33ac1a169f0d8a72a5e8a2fe9","Viognier - Ampélographie.jpg":"7633fde4d37ad4d704e5ff078fecfd3d","Cabernet-franc.jpg":"a4725c598c2ef7e80544ffe6d406924b","Cabernet sauvignon Viala Vermorel.jpg":"0aa7605fc3380d5af2f2c77b3bfdcef6","Carmenère - Ampélographie.jpg":"9494e03ca3e34ab9b34ad40bb3bbf8fc","Petit Gamay - Ampélographie.jpg":"1cdcb770f36602a8d339f82d98f2b5d4","Grenache N.jpg":"bd86d5f32292cf7f00acfbf67e9af5f2","Côt - Ampélographie.jpg":"a575bd469f19d3b584f227342c45e167","Merlot - Amplélographie.jpg":"269a250a4ca40b0a54969c1e7a280729","Mourvèdre - Ampélographie.jpg":"08e3f05fd3bbeeb667713da83af4a0e9","Pinot Noir (Viala Vermorel).jpg":"4772b151a64f07519470b2dec01576f4","Nieluccio - Ampélographie.png":"cb69a8b9907ffaa1ddc60e2be17d5521","Syrah - Ampélographie.jpg":"a601c6a919e518c146591fb320cbfff7","Tempranillo Viala et Vermorel.jpg":"af7b63d0a8aacc0cb9661cba7eeaa111"};
+const altUrl=(f,w)=>"https://commons.wikimedia.org/wiki/Special:FilePath/"+encodeURIComponent(f.replace(/ /g,"_"))+"?width="+w;
+const fileUrl=(f,w)=>{const n=f.replace(/ /g,"_"),m=MD5[f],e=encodeURIComponent(n);return m?`https://upload.wikimedia.org/wikipedia/commons/thumb/${m[0]}/${m.slice(0,2)}/${e}/${w}px-${e}`:"https://commons.wikimedia.org/wiki/Special:FilePath/"+e+"?width="+w};
 const filePage=f=>"https://commons.wikimedia.org/wiki/File:"+encodeURIComponent(f.replace(/ /g,"_"));
 function hashN(s){let x=0;for(const c of s)x=(x*31+c.charCodeAt(0))>>>0;return x}
 // Getekende tros als de plaat ontbreekt of niet laadt.
@@ -482,12 +485,15 @@ function cluster(g){
 }
 function plate(g,w){
   const p=PLATES[g.n];
-  return `<span class="plate">${cluster(g)}${p?`<img alt="Botanische plaat van ${h(g.n.toLowerCase())}" data-src="${fileUrl(p[0],w)}">`:""}</span>`;
+  return `<span class="plate">${cluster(g)}${p?`<img alt="Botanische plaat van ${h(g.n.toLowerCase())}" data-src="${fileUrl(p[0],w)}" data-alt="${altUrl(p[0],w)}">`:""}</span>`;
 }
+let warmed=false;
+function warmPlates(){if(warmed)return;warmed=true;const go=()=>Object.values(PLATES).forEach(p=>{const i=new Image();i.decoding="async";i.src=fileUrl(p[0],500)});try{(window.requestIdleCallback||setTimeout)(go,1500)}catch(e){}}
 function hookPlates(){
+  if(!build&&!gview)warmPlates();
   view.querySelectorAll(".plate img[data-src]").forEach(im=>{
     im.addEventListener("load",()=>{im.parentNode.classList.add("loaded");const c=document.getElementById("platecredit");if(c)c.hidden=false});
-    im.addEventListener("error",()=>im.remove());
+    im.addEventListener("error",()=>{if(im.dataset.alt){const a=im.dataset.alt;im.removeAttribute("data-alt");im.src=a}else im.remove()});
     im.src=im.dataset.src;im.removeAttribute("data-src");
   });
 }
@@ -507,7 +513,7 @@ function vGrape(g){
       <p class="small">${h(g.hT)}</p>
       <button class="btn" data-act="grape" data-n="${h(g.n)}">Test jezelf eerst</button>
       ${score!==undefined?`<p class="small muted">Beste score: ${score}%</p>`:""}</div>
-    <figure>${plate(g,600)}<figcaption id="platecredit" class="src" hidden>${p?`Viala &amp; Vermorel, <i>Ampélographie</i> (1901–1910)${p[1]?", "+h(p[1]):""}. Publiek domein, <a href="${filePage(p[0])}">Wikimedia Commons</a>.`:""}</figcaption></figure>
+    <figure>${plate(g,500)}<figcaption id="platecredit" class="src" hidden>${p?`Viala &amp; Vermorel, <i>Ampélographie</i> (1901–1910)${p[1]?", "+h(p[1]):""}. Publiek domein, <a href="${filePage(p[0])}">Wikimedia Commons</a>.`:""}</figcaption></figure>
   </section>
   <section class="card"><h3>In de fles</h3>
     ${g.geur?`<div class="field"><div class="row between"><strong>Geurigheid</strong><span class="small muted">${h(words(g.geur))}</span></div>${scale(LV,lvR(g.geur))}</div>`:""}
