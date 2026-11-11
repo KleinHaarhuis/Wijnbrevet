@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Wijnbrevet Trainer</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#7a1f3d">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -791,6 +795,7 @@ load();
 const start=(location.hash||"").slice(1);if(["start","overhoren","opbouwen","kaart","proeven"].includes(start))tab=start;
 render();
 }
+try{if("serviceWorker" in navigator&&location.protocol==="https:"&&/github\.io$/.test(location.hostname))navigator.serviceWorker.register("sw.js").catch(()=>{})}catch(e){}
 if(typeof module!=="undefined")module.exports={G,GQ,RQ,termQ,makeQuiz,tasteQ,TASTE,byName,FR,IT,EU,NW};
 </script>
 </body>
