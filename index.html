@@ -5,47 +5,53 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Wijnbrevet Trainer</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#7a1f3d">
+<meta name="theme-color" content="#f3f1e7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14201a" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,400&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* Layout: one column for a phone, tab bar at the bottom, cards only for the thing you act on. */
 :root{
-  --bg:#f3f5ef; --surface:#ffffff; --ink:#1c2420; --muted:#5a685f; --line:#dde2d8;
-  --accent:#7a1f3d; --accent-ink:#ffffff; --leaf:#55752a; --gold:#a8831f;
-  --good:#2b7a4b; --bad:#b0352d; --warn:#996a12; --water:#2f78a8;
-  --good-bg:#e3f1e7; --bad-bg:#f8e4e1; --warn-bg:#f6ecd4;
-  --paper:#f4efe2;
-  --display:"Bricolage Grotesque","Figtree",system-ui,sans-serif;
+  /* Stijl "botanische atlas": papier, salie, olijf; oudroze voor rood/blauw, licht goud voor wit. */
+  --bg:#f3f1e7; --surface:#fbfaf4; --ink:#26321f; --muted:#66735c; --line:#dfe2d1;
+  --accent:#3b5220; --accent-ink:#f4f1e6; --leaf:#7f9a5a; --gold:#b3913f; --rose:#a8687b; --region:#a8687b;
+  --good:#4f7a2e; --bad:#a2505f; --warn:#94701c; --water:#4f8c88;
+  --good-bg:#e3ecd4; --bad-bg:#f4e1e3; --warn-bg:#f3ead2;
+  --t1:#e6ecd8; --t2:#f1e3e6; --t3:#e1ebe8; --t4:#f3ead2;
+  --paper:#f6f3e6;
+  --display:"Fraunces",Georgia,serif;
   --body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     color-scheme:dark;
-    --bg:#131714; --surface:#1d231f; --ink:#e8ece5; --muted:#9ba89e; --line:#2e3731;
-    --accent:#e07f9b; --accent-ink:#22090f; --leaf:#a8c56a; --gold:#dfbd62;
-    --good:#74c492; --bad:#f08e84; --warn:#e2b464; --water:#7db9dc;
-    --good-bg:#1c3326; --bad-bg:#3a201d; --warn-bg:#352a14;
+    --bg:#14201a; --surface:#1c2b23; --ink:#e9eee2; --muted:#a7b59c; --line:#2d3f33;
+    --accent:#a9c47f; --accent-ink:#14201a; --leaf:#a9c47f; --gold:#dcc58a; --rose:#d29aab; --region:#d29aab;
+    --good:#9cc77a; --bad:#e3a3b0; --warn:#e2c27a; --water:#8fc1bd;
+    --good-bg:#24392a; --bad-bg:#3b2a2f; --warn-bg:#3a3420;
+    --t1:#22382a; --t2:#3a2a31; --t3:#1f3634; --t4:#37321f; --paper:#1f2f26;
   }
 }
 :root[data-theme="dark"]{
   color-scheme:dark;
-  --bg:#131714; --surface:#1d231f; --ink:#e8ece5; --muted:#9ba89e; --line:#2e3731;
-  --accent:#e07f9b; --accent-ink:#22090f; --leaf:#a8c56a; --gold:#dfbd62;
-  --good:#74c492; --bad:#f08e84; --warn:#e2b464; --water:#7db9dc;
-  --good-bg:#1c3326; --bad-bg:#3a201d; --warn-bg:#352a14;
+  --bg:#14201a; --surface:#1c2b23; --ink:#e9eee2; --muted:#a7b59c; --line:#2d3f33;
+  --accent:#a9c47f; --accent-ink:#14201a; --leaf:#a9c47f; --gold:#dcc58a; --rose:#d29aab; --region:#d29aab;
+  --good:#9cc77a; --bad:#e3a3b0; --warn:#e2c27a; --water:#8fc1bd;
+  --good-bg:#24392a; --bad-bg:#3b2a2f; --warn-bg:#3a3420;
+  --t1:#22382a; --t2:#3a2a31; --t3:#1f3634; --t4:#37321f; --paper:#1f2f26;
 }
 *{box-sizing:border-box}
 html,body{margin:0}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%}
 header{padding:18px 16px 6px;max-width:640px;margin:0 auto}
-header h1{font-family:var(--display);font-size:1.5rem;line-height:1.1;margin:0;letter-spacing:-.01em}
+header h1{font-family:var(--display);font-weight:500;font-size:1.55rem;line-height:1.1;margin:0;display:flex;align-items:center;gap:8px}
+header h1 svg{flex:none}
 header p{margin:2px 0 0;color:var(--muted);font-size:.85rem}
 main{max-width:640px;margin:0 auto;padding:10px 16px 104px;display:flex;flex-direction:column;gap:14px}
-h2{font-family:var(--display);font-size:1.2rem;line-height:1.2;margin:0;text-wrap:balance}
+h2{font-family:var(--display);font-weight:500;font-size:1.25rem;line-height:1.2;margin:0;text-wrap:balance}
 h3{font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0;font-weight:700}
 p{margin:0}
 .muted{color:var(--muted)}
@@ -80,7 +86,7 @@ button:focus-visible{outline:3px solid var(--leaf);outline-offset:2px}
 .grape{display:grid;grid-template-columns:40px 1fr;align-items:center;gap:10px;text-align:left;background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:6px 10px 6px 6px;min-height:58px;font-size:.92rem}
 .grape .plate{height:46px;border-radius:6px}
 .grape em{display:block;font-style:normal;font-size:.75rem;color:var(--muted);font-variant-numeric:tabular-nums}
-.grape.w{border-left:5px solid var(--gold)} .grape.b{border-left:5px solid var(--accent)}
+.grape.w{border-left:5px solid var(--gold)} .grape.b{border-left:5px solid var(--rose)}
 .plate{position:relative;display:block;background:var(--paper);overflow:hidden;border-radius:10px}
 .plate svg.drawn{display:block;width:100%;height:100%;padding:6%}
 .plate img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0}
@@ -94,7 +100,7 @@ button:focus-visible{outline:3px solid var(--leaf);outline-offset:2px}
 .scale{display:grid;gap:3px}
 .scale span{display:flex;flex-direction:column;gap:4px;align-items:center}
 .scale i{display:block;width:100%;height:10px;border-radius:3px;background:var(--line)}
-.scale span.on i{background:var(--accent)}
+.scale span.on i{background:var(--leaf)}
 .scale b{font-size:.72rem;font-weight:600;color:var(--muted)}
 .scale span.on b{color:var(--ink)}
 .tag{display:inline-block;border-radius:999px;padding:3px 10px;font-size:.82rem;border:1px solid var(--line);color:var(--muted)}
@@ -105,7 +111,7 @@ button:focus-visible{outline:3px solid var(--leaf);outline-offset:2px}
 .res{display:flex;flex-direction:column;gap:3px;padding:10px 0;border-top:1px solid var(--line)}
 .res:first-of-type{border-top:0;padding-top:0}
 .swatch{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:baseline}
-.swatch.w{background:var(--gold)} .swatch.b{background:var(--accent)}
+.swatch.w{background:var(--gold)} .swatch.b{background:var(--rose)}
 .stat{display:flex;flex-direction:column;gap:5px}
 .stat .row{font-variant-numeric:tabular-nums}
 .check{display:flex;gap:10px;align-items:center;background:transparent;border:0;border-top:1px solid var(--line);padding:11px 0;width:100%;text-align:left;min-height:46px}
@@ -120,8 +126,9 @@ nav button{flex:1;background:transparent;border:0;border-radius:10px;padding:8px
 nav button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 nav button[aria-current="page"]{color:var(--accent)}
 .hub{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.tile{display:flex;flex-direction:column;gap:4px;text-align:left;background:var(--surface);border:1.5px solid var(--line);border-left:5px solid var(--accent);border-radius:14px;padding:14px;min-height:92px}
-.tile strong{font-family:var(--display);font-size:1.08rem}
+.tile{display:flex;flex-direction:column;gap:4px;text-align:left;background:var(--t1);border:1px solid var(--line);border-radius:14px;padding:14px;min-height:92px}
+.tile:nth-child(2){background:var(--t2)}.tile:nth-child(3){background:var(--t3)}.tile:nth-child(4){background:var(--t4)}
+.tile strong{font-family:var(--display);font-weight:500;font-size:1.15rem}
 .tile span{font-size:.82rem;color:var(--muted)}
 .src{font-size:.8rem;color:var(--muted)}
 .link{background:none;border:0;padding:6px 0;color:var(--muted);text-decoration:underline;font-size:.86rem;text-align:left;min-height:36px}
@@ -133,16 +140,16 @@ textarea{width:100%;min-height:110px;font:inherit;font-size:.82rem;color:var(--i
 .map text.sub{fill:var(--gold);font-style:italic}
 .map .dot.soil{fill:var(--leaf)}
 .map .grp text{font-weight:600}.map .grp.link{cursor:pointer}.map .grp.link text{fill:var(--accent);text-decoration:underline}
-.map .grp .gw{fill:var(--gold);stroke:var(--surface);stroke-width:1px;vector-effect:non-scaling-stroke}.map .grp .gb{fill:#4b2a52;stroke:var(--surface);stroke-width:1px;vector-effect:non-scaling-stroke}
+.map .grp .gw{fill:var(--gold);stroke:var(--surface);stroke-width:1px;vector-effect:non-scaling-stroke}.map .grp .gb{fill:var(--rose);stroke:var(--surface);stroke-width:1px;vector-effect:non-scaling-stroke}
 .map .grp.link text,.map .grp.link circle{pointer-events:all}
 /* Reliëf grijs maken, zodat bergen (bruin/rood op de topokaart) niet verward worden met de rode wijngebieden. */
 .map image{filter:grayscale(.9) contrast(1.05) brightness(1.04)}
 .map .reg,.map .hit{fill-rule:evenodd}
-.map .reg{fill:var(--accent);fill-opacity:.3;stroke:var(--accent);stroke-width:2;vector-effect:non-scaling-stroke;stroke-linejoin:round}
+.map .reg{fill:var(--region);fill-opacity:.3;stroke:var(--region);stroke-width:2;vector-effect:non-scaling-stroke;stroke-linejoin:round}
 .map .reg.kid{fill-opacity:.22;stroke-width:1.5;stroke-dasharray:5 3}
 .map .reg.sel{fill-opacity:.6}
 .map .lake{fill:var(--water);fill-opacity:.75;stroke:var(--water);stroke-width:1px;vector-effect:non-scaling-stroke}
-.sec .fog{fill:#fff;opacity:.75}
+.sec .fog{fill:var(--surface);opacity:.8}
 .map .reg.q{fill:var(--ink);fill-opacity:.2;stroke:var(--ink)}
 .map .reg.bad{fill:var(--bad);stroke:var(--bad);fill-opacity:.55}
 .map .hit{fill:transparent;stroke:transparent;stroke-width:14;vector-effect:non-scaling-stroke;pointer-events:all;cursor:pointer}
@@ -162,7 +169,7 @@ textarea{width:100%;min-height:110px;font:inherit;font-size:.82rem;color:var(--i
 </head>
 <body>
 <header>
-  <h1>Wijnbrevet Trainer</h1>
+  <h1><svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c3 0 6 2 6 5-3 0-6-2-6-5z" fill="var(--leaf)"/><g fill="var(--rose)"><circle cx="9" cy="11" r="2.4"/><circle cx="14" cy="11" r="2.4"/><circle cx="11.5" cy="15" r="2.4"/><circle cx="7" cy="15" r="2.2"/><circle cx="16" cy="15" r="2.2"/><circle cx="11.5" cy="19.2" r="2.2"/></g></svg>Wijnbrevet Trainer</h1>
   <p>SDEN 3 · bij het boek Ik weet veel van wijn</p>
 </header>
 <main id="view"></main>
@@ -688,7 +695,7 @@ function vTaste(){
 
 function flagText(){return store.flags.map((f,i)=>`${i+1}. ${f.q}\n   In de app: ${f.a}\n   Bron: ${f.src}`).join("\n")}
 function vStart(){
-  const tiles=[["overhoren","Overhoren","Vragen met 3 antwoorden, zoals op het examen"],["opbouwen","Druiven","Bouw zelf een profiel en kijk het na"],["kaart","Kaart","Duitsland: gebieden, rivieren, bergen"],["proeven","Proeven","Herken het glas en houd je proeflijst bij"]];
+  const tiles=[["overhoren","Overhoren","Vragen met 3 antwoorden, zoals op het examen"],["opbouwen","Druiven","Bouw zelf een profiel en kijk het na"],["kaart","Kaart",Object.keys(GEO).join(", ")],["proeven","Proeven","Herken het glas en houd je proeflijst bij"]];
   const rows=[...TOPICS,{label:"Proeven",code:"6a.3"}].map(t=>{const s=store.stats[t.code]||{g:0,t:0},p=s.t?Math.round(100*s.g/s.t):0;
     return `<div class="stat"><div class="row between"><span>${t.label} <span class="pill code">${t.code}</span></span><strong>${s.t?p+"%":"nog niet geoefend"}</strong></div><div class="bar"><i style="width:${p}%"></i></div>${s.t?`<span class="muted small">${s.g} van ${s.t} goed</span>`:""}</div>`}).join("");
   const built=Object.keys(store.built),full=built.filter(n=>store.built[n]===100).length;
