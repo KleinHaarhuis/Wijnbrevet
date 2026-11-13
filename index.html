@@ -81,6 +81,17 @@ button:focus-visible{outline:3px solid var(--leaf);outline-offset:2px}
 .pill.no{background:var(--bad-bg);color:var(--bad)}
 .pill.half{background:var(--warn-bg);color:var(--warn)}
 .pill.code{background:transparent;border:1px solid var(--line);color:var(--muted);font-variant-numeric:tabular-nums}
+.pill.dim{background:transparent;border:1px dashed var(--line);color:var(--muted);font-weight:500}
+.week{display:flex;gap:6px}.week span{flex:1;text-align:center;font-size:.72rem;color:var(--muted)}
+.week i{display:block;height:8px;border-radius:4px;background:var(--line);margin-bottom:3px}.week i.on{background:var(--leaf)}
+input[type=search],input[type=date]{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-height:44px}
+input[type=search]{width:100%}input:focus-visible,textarea:focus-visible{outline:3px solid var(--leaf);outline-offset:1px}
+#zoekres{display:flex;flex-direction:column}
+.hit2{display:flex;justify-content:space-between;gap:10px;align-items:baseline;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:11px 2px;min-height:44px;width:100%}
+.hit2 span{color:var(--muted);font-size:.82rem;text-align:right}
+.dag{display:flex;gap:14px;align-items:center}.dag .plate{width:84px;height:104px;flex:none}.dag>div{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.result .big{font-family:var(--display);font-size:2.6rem;line-height:1}.result .big span{font-size:1rem;color:var(--muted);font-family:var(--body)}
+.result.pass{border-color:var(--leaf);background:var(--good-bg)}
 .note{border-left:3px solid var(--leaf);padding:2px 0 2px 12px;font-size:.92rem}
 .grapes{display:grid;grid-template-columns:repeat(auto-fill,minmax(136px,1fr));gap:8px}
 .grape{display:grid;grid-template-columns:40px 1fr;align-items:center;gap:10px;text-align:left;background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:6px 10px 6px 6px;min-height:58px;font-size:.92rem}
@@ -368,10 +379,95 @@ const ATQ=[
 ["Welke twee lokale witte druiven uit Valais noemt het boek?","Petite arvine en heida",["Fendant en dôle","Morillon en muskateller"],"Ze geven sappige en vooral authentieke witte wijnen.",169,"1.3"],
 ["Welke andere naam noemt het boek voor pinot noir in Zwitserland?","Blauburgunder",["Blaufränkisch","Morillon"],"In Duitsland heet pinot noir spätburgunder.",169,"1.3"]
 ];
-const CQ={duitsland:[()=>DEQ,"de"],oostenrijk:[()=>ATQ,"at"]};
+const FRQ=[
+["Welke bergen houden in Alsace wolken en regen uit het westen tegen?","De Vogezen",["De Jura","De Alpen"],"Daardoor is Alsace een van de zonnigste streken van Frankrijk, met zo'n 1800 zonuren per jaar."],
+["Hoe is de verhouding wit/rood in Alsace?","90% wit, 10% rood",["50% wit, 50% rood","30% wit, 70% rood"],"Het rood is van pinot noir."],
+["Wat is een Edelzwicker of Gentil?","Een blend uit Alsace",["Een zoete wijn van edelgerotte druiven","Een mousserende wijn"],"Wijn uit Alsace is bijna altijd van één druif; Edelzwicker en Gentil zijn de blends."],
+["Wat betekent Vendanges Tardives?","Laat geoogst",["Edele rotting","Op stromatten gedroogd"],"Zoete wijn uit Alsace, alleen van riesling, pinot gris, gewurztraminer en muscat."],
+["Wat is in Alsace een Sélection de Grains Nobles?","Zoete wijn van druiven met edele rotting",["Droge wijn van de beste wijngaard","Een blend van edele druiven"],"Net als Vendanges Tardives alleen van riesling, pinot gris, gewurztraminer en muscat."],
+["Hoeveel Grands Crus heeft Alsace?","54",["33","10"],"Meestal van riesling, pinot gris, gewurztraminer en muscat; 3 voor pinot noir en 1 voor sylvaner."],
+["Wat is de verplichte flesvorm in Alsace?","Flûte d'Alsace",["Bocksbeutel","Barrique"],"De slanke fles is verplicht."],
+["Wat is het hart van de Bourgogne?","De Côte d'Or",["De Mâconnais","Chablis"],"De Côte d'Or bestaat uit de Côte de Nuits en de Côte de Beaune."],
+["Welk klimaat heeft de Bourgogne?","Semicontinentaal",["Mediterraan","Zeeklimaat"],"Lange koude winters, korte warme zomers en nachtvorst in het voorjaar."],
+["Hoeveel grand-cruwijngaarden heeft de Bourgogne?","33: 1 in Chablis en 32 in de Côte d'Or",["54, allemaal in de Côte d'Or","10, allemaal in de Beaujolais"],"24 daarvan liggen in de Côte de Nuits, 8 in de Côte de Beaune."],
+["Wat staat in de Bourgogne bovenaan de pyramide?","Grand Cru",["Premier Cru","Bourgogne"],"Van boven naar beneden: Grand Cru, Premier Cru, gemeente, deel van het gebied, Bourgogne."],
+["Van welke druif is Chablis?","Chardonnay",["Sauvignon blanc","Chenin blanc"],"Chablis is altijd wit en 100% chardonnay."],
+["Hoe heet de bijzondere kalkrijke klei van Chablis?","Kimméridgien",["Galets roulés","Silex"],"Circa 155 miljoen jaar oud, mineraal- en fossielrijk, genoemd naar Kimmeridge in Zuid-Engeland."],
+["Hoeveel climats heeft Chablis Grand Cru?","7",["40","33"],"Chablis Premier Cru heeft 40 climats."],
+["Hoe is een gewone Chablis?","Droog, fris en licht, zonder hout, om jong te drinken",["Rijk en krachtig, met houtrijping","Halfzoet en zacht"],"Rijk en krachtig, vaak met hout, is de Grand Cru."],
+["Waar staat de Côte de Nuits vooral om bekend?","Rode wijn van pinot noir",["Witte wijn van chardonnay","Mousserende wijn"],"24 van de 33 grand-cruwijngaarden liggen hier, en op 1 na leveren ze allemaal rood."],
+["Welke grand cru in de Côte de Nuits levert ook witte wijn?","Musigny",["Le Chambertin","Corton"],"Musigny ligt in Chambolle-Musigny."],
+["Waar staat de Côte de Beaune vooral om bekend?","Grote witte wijnen",["Zware rode wijnen van gamay","Zoete wijn"],"Ook uitstekend rood, iets lichter en minder complex dan uit de Côte de Nuits."],
+["Welke grand cru in de Côte de Beaune is voor rode wijn?","Corton",["Musigny","Montrachet"],"De 8 grand-cruwijngaarden van de Côte de Beaune leveren op Corton na alleen wit."],
+["Hoe is de wijn van Meursault?","Wit, vol, rond, nootachtig, boter",["Rood, krachtig en tanninerijk","Wit, beendroog en licht"],"Meursault is een van de beroemde witte gemeenten van de Côte de Beaune."],
+["Hoe is de wijn van Pommard?","Rood, donker, krachtig en tanninerijk",["Rood, elegant en relatief zacht","Wit, rijk en complex"],"Het elegante, relatief zachte rood komt uit buurgemeente Volnay."],
+["Wat is de bekendste gemeente van de Côte Chalonnaise?","Mercurey",["Meursault","Pommard"],"Vooral rood, ook wit: middelzwaar, fruitig en fris."],
+["Welke appellation levert de beste witte wijn uit de Mâconnais?","Pouilly-Fuissé",["Pouilly-Fumé","Puligny-Montrachet"],"Van chardonnay. Pouilly-Fumé komt van de Loire en is sauvignon blanc."],
+["Welke drie dingen geven de Beaujolais zijn eigen gezicht?","Graniet, gamay en macération semi-carbonique",["Kalk, pinot noir en houtrijping","Kiezel, merlot en barriques"],"Hele trossen gaan in een afgesloten kuip; het koolzuurgas beschermt tegen oxidatie."],
+["Hoeveel crus heeft de Beaujolais?","10",["7","33"],"Ze liggen in het noorden, de Haut-Beaujolais."],
+["Welke cru van de Beaujolais is stevig, met rood en zwart fruit?","Moulin-à-Vent",["Saint-Amour","Fleurie"],"Saint-Amour is de lichtste cru; Fleurie is fris, fruitig en elegant."],
+["Wat is vin jaune?","Wijn uit de Jura die jarenlang op vat rijpt onder een gistlaag",["Zoete wijn van op stromatten gedroogde druiven","Mousserende wijn uit de Savoie"],"De gistlaag (fleur) is vergelijkbaar met flor bij sherry. De strowijn heet vin de paille."],
+["Wat is vin de paille?","Zoete wijn van op stromatten gedroogde druiven",["Wijn die rijpt onder een gistlaag","Jonge wijn die 4 dagen weekt"],"Een specialiteit van de Jura."],
+["Welke witte druif beslaat de helft van de aanplant in de Savoie?","Jacquère",["Savagnin","Viognier"],"Daarnaast altesse; blauw: gamay en mondeuse."],
+["Waarom spreekt men van een noordelijke en een zuidelijke Rhône?","Het noorden is een smal dal met hellingen, het zuiden is breder en grootschaliger",["In het noorden maakt men alleen wit, in het zuiden alleen rood","Het noorden hoort bij de Bourgogne"],"De vorm is een omgekeerde trechter; de grens ligt bij Montélimar."],
+["Wat is de enige blauwe druif voor de crus van de noordelijke Rhône?","Syrah",["Grenache","Mourvèdre"],"Wit: viognier, marsanne en roussanne."],
+["Welke druif is de basis van alle rode wijn in de zuidelijke Rhône?","Grenache",["Syrah","Gamay"],"Aangevuld met onder meer syrah, mourvèdre, cinsault en carignan."],
+["Wat betekent Côte-Rôtie?","Geroosterde helling",["Gouden kust","Koude helling"],"Rotsachtige wijngaarden die 's zomers de hele dag in de zon bakken; de noordelijkste cru van de Rhône."],
+["Wat mag er in Côte-Rôtie bij de syrah?","Maximaal 20% viognier",["Maximaal 15% grenache","Niets, het is altijd 100% syrah"],"De viognier wordt samen met de syrah vergist."],
+["Van welke druif is Condrieu?","Viognier",["Marsanne","Chardonnay"],"Dé appellation voor grote witte wijn van viognier: aromatisch, rijk, met milde zuren."],
+["Wat is de grootste appellation van de noordelijke Rhône?","Crozes-Hermitage",["Hermitage","Condrieu"],"Op de oostoever, deels om Hermitage heen."],
+["Wat zijn galets roulés?","Rolkeien, zoals in Châteauneuf-du-Pape",["Kiezelrijke hellingen in de Médoc","Kloven in de Bourgogne"],"In het zuiden van de Rhône liggen terrassen met rolkeien op rode klei."],
+["Wat is de mistral?","Een koude noordenwind in het Rhônedal en de Provence",["Een warme wind uit zee","Ochtendmist bij Sauternes"],"Hij kan schade geven, maar blaast de lucht schoon: veel zon en weinig schimmel."],
+["Wat is Muscat de Beaumes-de-Venise?","Een zoete, geurige vin doux naturel",["Een droge rosé","Een mousserende wijn"],"Goudgeel, van muscat blanc à petits grains, uit de zuidelijke Rhône."],
+["Welk wijntype maakt de Provence vooral?","Droge rosé",["Zoete witte wijn","Mousserende wijn"],"80% is bleke, strakdroge rosé; de druiven worden direct na de oogst zacht geperst."],
+["Op welke druif berust de reputatie van Bandol?","Mourvèdre",["Syrah","Gamay"],"Mourvèdre kan door zijn dikke schil goed tegen hitte en droogte."],
+["Welke AOP op Corsica heeft de beste reputatie?","Patrimonio",["Bandol","Banyuls"],"Van nielluccio, de Corsicaanse sangiovese, en rolle (vermentino)."],
+["Wat is het grootste wijnbouwgebied van Frankrijk?","Languedoc-Roussillon",["Bordeaux","Champagne"],"225.000 ha, goed voor 30% van de Franse productie."],
+["Wat is de grootste individuele appellation van de Languedoc?","Corbières",["Minervois","Limoux"],"90% rood, vooral van carignan en grenache: rustiek, pittig en kruidig."],
+["Waarin is Limoux gespecialiseerd?","Mousserende en stille witte wijn",["Vin doux naturel","Stevige rode wijn van tannat"],"Dankzij de hogere ligging en de verkoelende invloed van de Atlantische Oceaan."],
+["Van welke druif is Blanquette de Limoux?","Mauzac",["Chardonnay","Muscat"],"Crémant de Limoux is vooral chardonnay."],
+["Hoe ontstaat een vin doux naturel?","De gisting wordt onderbroken met wijnalcohol",["De druiven drogen op stromatten","De wijn rijpt onder een gistlaag"],"Zo blijft er veel restsuiker over. Voorbeelden: Rivesaltes, Banyuls, Muscat de Beaumes-de-Venise."],
+["Wat is de bekendste vin doux naturel van de Roussillon?","Banyuls",["Monbazillac","Sauternes"],"Van grenache, van steile wijngaarden met schistbodems."],
+["Van welke druif is Cahors vooral?","Malbec (cot)",["Tannat","Gamay"],"Cahors is de bakermat van malbec, die hier nog cot heet."],
+["Van welke druif is Madiran vooral?","Tannat",["Malbec","Merlot"],"Minstens 50% tannat, een druif met veel tannine."],
+["Wat is micro-oxygenatie (micro-bullage)?","Kleine hoeveelheden zuurstof toevoegen om tannine zachter te maken",["Koolzuur toevoegen voor bubbels","De wijn op zijn bezinksel laten rijpen"],"Madiran was de eerste die het toepaste, om de tannat te temmen."],
+["Van welke druiven is Jurançon?","Gros manseng en petit manseng",["Sémillon en sauvignon blanc","Colombard en ugni blanc"],"Droog en zoet wit, altijd met hoge zuren."],
+["Wat is passerillage?","Druiven aan de stok laten indrogen",["Druiven plukken in meerdere rondgangen","Hele trossen vergisten"],"Zo maakt men de zoete Jurançon."],
+["Wat is Monbazillac?","Zoete witte wijn uit Bergerac",["Stevige rode wijn uit Cahors","Vin doux naturel uit de Roussillon"],"Van overrijpe of edelgerotte sémillon en sauvignon blanc."],
+["Wat hebben de linker- en de rechteroever van Bordeaux als hoofddruif?","Links cabernet sauvignon, rechts merlot",["Links merlot, rechts cabernet sauvignon","Links syrah, rechts grenache"],"De linkeroever ligt aan de Garonne en Gironde, de rechteroever aan de Dordogne."],
+["Welk gebied ligt tussen Garonne en Dordogne?","Entre-Deux-Mers",["Médoc","Pomerol"],"'Tussen 2 zeeën'; bekend van droge witte wijn, maar ook veel rood."],
+["Hoeveel liter gaat er in een barrique?","225 liter",["100 liter","500 liter"],"In Bordeaux rijpt wijn vaak op barriques."],
+["Waarop is de classificatie van 1855 gebaseerd?","Op de reputatie (prijzen) van de wijnhuizen toen",["Op de bodem van de wijngaarden","Op een blindproeverij"],"61 wijnhuizen uit Médoc en Graves in 5 klassen."],
+["Wat was de enige wijziging in de classificatie van 1855?","Mouton Rothschild werd in 1973 een 1e cru",["Petrus werd in 1955 toegevoegd","Château d'Yquem werd in 2020 geschrapt"],"Verder is de indeling nooit veranderd."],
+["Wat zijn de croupes graveleuses?","Glooiende, kiezelrijke hellingen in de Haut-Médoc",["Rolkeien in de zuidelijke Rhône","Kloven in de Côte d'Or"],"Dicht bij de Gironde; hier zitten de Grands Crus Classés."],
+["Welke drie Premiers Grands Crus Classés liggen in Pauillac?","Lafite Rothschild, Mouton Rothschild en Latour",["Margaux, Haut-Brion en Latour","Petrus, Cheval Blanc en d'Yquem"],"Château Margaux ligt in Margaux, Haut-Brion in Pessac-Léognan."],
+["Welke gemeenten van de Haut-Médoc geven wat soepeler en eleganter wijn, met meer merlot?","Listrac, Moulis en Margaux",["Saint-Estèphe, Pauillac en Saint-Julien","Pomerol en Fronsac"],"Saint-Estèphe, Pauillac en Saint-Julien zijn krachtig en robuust, met meer cabernet."],
+["Waarom is Sauternes geschikt voor edelzoete wijn?","Een warm hoekje bij het water, ideaal voor botrytis",["De druiven bevriezen er aan de stok","De wijn wordt versterkt met alcohol"],"De beste huizen plukken in 8 à 10 rondgangen (tri successif)."],
+["Welk chateau is in Sauternes Premier Cru Supérieur?","Château d'Yquem",["Château Latour","Petrus"],"In de classificatie van Sauternes-Barsac uit 1855, met 27 chateaus."],
+["Welke bekende appellation van Bordeaux heeft geen classificatie?","Pomerol",["Saint-Émilion","Médoc"],"Toch is Petrus, 100% merlot, de beroemdste en duurste wijn van Bordeaux."],
+["Van welke druif is Château Cheval Blanc grotendeels?","Cabernet franc",["Cabernet sauvignon","Malbec"],"Cheval Blanc ligt in Saint-Émilion, op de rechteroever."],
+["Welke drie witte druiven kom je van west naar oost langs de Loire tegen?","Melon de Bourgogne, chenin blanc, sauvignon blanc",["Sauvignon blanc, chenin blanc, melon de Bourgogne","Chardonnay, viognier, muscat"],"Muscadet in het westen, Anjou, Saumur en Vouvray in het midden, Sancerre in het oosten."],
+["Van welke druif is Muscadet?","Melon de Bourgogne",["Muscat","Chenin blanc"],"Droog, licht, fris, groene appel, 'zilt'; uit Pays Nantais."],
+["Wat betekent 'sur lie' bij Muscadet?","De wijn rijpt op zijn bezinksel",["De wijn rijpt op houten vaten","De druiven zijn laat geoogst"],"Verplicht tot maart na de oogst; de wijn smaakt er voller door."],
+["Hoe is Rosé d'Anjou?","Halfdroog",["Beendroog","Mousserend"],"Van onder andere grolleau."],
+["Van welke druif is Savennières?","Chenin",["Sauvignon blanc","Melon de Bourgogne"],"Het prototype van een chenin-wijn, op vulkanische leisteen."],
+["Welk wijntype is Coteaux du Layon?","Zoete witte wijn van chenin",["Droge rode wijn van cabernet franc","Mousserende rosé"],"Aan de Layon is het 's ochtends vochtig en warmt het later op: ideaal voor edele rotting."],
+["Hoe heet cabernet franc aan de Loire?","Breton",["Cot","Morillon"],"De druif van Chinon, Bourgueil en Saumur-Champigny."],
+["Welke druif speelt de hoofdrol in Vouvray?","Chenin blanc",["Sauvignon blanc","Chardonnay"],"Droog, halfdroog, (edel)zoet en mousserend, altijd met een hoog zuurgehalte."],
+["Van welke druif is witte Sancerre?","Sauvignon blanc",["Chenin blanc","Chardonnay"],"Rood en rosé uit Sancerre zijn van pinot noir."],
+["Hoe verhoudt Pouilly-Fumé zich tot Sancerre?","Iets ronder en fruitiger",["Zoeter en zwaarder","Lichter en mousserend"],"Beide zijn sauvignon blanc uit Centre-Loire; ze liggen bijna tegenover elkaar aan de rivier."],
+["Welke bodem geeft Champagne zijn karakter?","Kalk en krijt",["Graniet","Rolkeien"],"De bodem werkt als een spons en neemt warmte op die hij 's nachts afstaat."],
+["Welke drie druiven gebruikt men voor champagne?","Chardonnay, pinot noir en meunier",["Chardonnay, chenin blanc en gamay","Pinot noir, pinot gris en riesling"],"De basiswijn is fris, met 10 à 11% alcohol."],
+["Welk deel van Champagne staat bekend om chardonnay?","Côte des Blancs",["Montagne de Reims","Vallée de la Marne"],"In de Montagne de Reims en de Vallée de la Marne staat vooral pinot noir."],
+["Wat is een Blanc de Blancs?","Champagne van alleen chardonnay",["Champagne van alleen blauwe druiven","Champagne zonder dosage"],"Blanc de Noirs is van alleen blauwe druiven."],
+["Hoeveel suiker mag een champagne Brut hooguit bevatten?","12 gram per liter",["3 gram per liter","32 gram per liter"],"Brut Nature max. 3, Extra Brut max. 6, Demi-Sec 32 tot 50 g/l."],
+["Wat betekent Millésimé op een champagne?","Van één oogstjaar",["Van één wijngaard","Zonder toegevoegde suiker"],"De meeste champagne is een assemblage van meerdere jaren."],
+["Hoeveel gemeenten in Champagne zijn Grand Cru?","17",["54","33"],"In Champagne geldt Grand Cru voor gemeenten."]
+].map(t=>[t[0],t[1],t[2],t[3],"76-123",/druif|druiven/.test(t[0])?"1.3":/Wat is |Wat zijn |betekent|Hoe ontstaat|suiker|flesvorm|pyramide|classificatie/.test(t[0])?"5a.3":"4.3"]);
+const CQ={duitsland:[()=>DEQ,"de"],oostenrijk:[()=>ATQ,"at"],frankrijk:[()=>FRQ,"fr"]};
 function cQ(topic){const [L,p]=CQ[topic],t=wpick(L(),t=>p+":"+t[0]),q=mk(t[5],topic,p+":"+t[0],t[0],t[1],t[2],t[3]);if(q)q.src="Boek p. "+t[4];return q}
 function deQ(){return cQ("duitsland")}
-const QUIZ_TOPICS=[...TOPICS,{id:"duitsland",label:"Duitsland"},{id:"oostenrijk",label:"Oostenrijk en Zwitserland"}];
+const QUIZ_TOPICS=[...TOPICS,{id:"duitsland",label:"Duitsland"},{id:"oostenrijk",label:"Oostenrijk en Zwitserland"},{id:"frankrijk",label:"Frankrijk"}];
 const LATER=["Wijnbouw (2a–2c)","Wijnbereiding (3a–3b)","Alcohol en wet (5b)","Omgaan met wijn (6b)"];
 
 /* ---------- Hulpjes ---------- */
@@ -386,8 +482,15 @@ const words=r=>sym(r)+" ("+cats(r).join(" tot ")+")";
 const byName=n=>G.find(g=>g.n===n);
 const related=(a,b)=>a===b||PARENT[a]===b||PARENT[b]===a||a.includes(b)||b.includes(a);
 
-let store={stats:{},miss:{},built:{},tasted:{},flags:[]};
-function load(){try{const s=JSON.parse(localStorage.getItem("wijnbrevet-v1"));if(s&&typeof s==="object")store=Object.assign(store,s)}catch(e){}}
+const fresh=()=>({stats:{},miss:{},built:{},tasted:{},flags:[],wrong:[],days:{},best:0,exam:"",examPass:0,theme:"auto"});
+let store=fresh();
+// Datum als jjjj-mm-dd in de eigen tijdzone; per dag tellen we de beantwoorde vragen.
+const dkey=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const today=()=>dkey(new Date());
+function streak(){let n=0;const d=new Date();if(!store.days[dkey(d)])d.setDate(d.getDate()-1);while(store.days[dkey(d)]){n++;d.setDate(d.getDate()-1)}return n}
+function tick(){const k=today();store.days[k]=(store.days[k]||0)+1;store.best=Math.max(store.best||0,streak())}
+const plain=x=>String(x).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+function load(){try{const s=JSON.parse(localStorage.getItem("wijnbrevet-v1"));if(s&&typeof s==="object")store=Object.assign(fresh(),s)}catch(e){}}
 function save(){try{localStorage.setItem("wijnbrevet-v1",JSON.stringify(store))}catch(e){}}
 // Wat je eerder fout had, komt vaker terug.
 function wpick(items,keyFn){const w=items.map(i=>1+2*(store.miss[keyFn(i)]||0));let t=w.reduce((a,b)=>a+b,0)*Math.random();for(let i=0;i<items.length;i++){t-=w[i];if(t<=0)return items[i]}return items[items.length-1]}
@@ -472,18 +575,34 @@ function tasteQ(){
 if(typeof document!=="undefined"){
 const view=document.getElementById("view");
 const ABC=["A","B","C"];
-let tab="start",copied=false,gview=null,quiz=null,setup={topics:["druiven","gebieden","termen","duitsland","oostenrijk"],n:10},build=null,taste=null,confirmReset=false;
+let tab="start",copied=false,gview=null,quiz=null,setup={topics:["druiven","gebieden","termen","duitsland","oostenrijk","frankrijk"],n:10},bkText="",bkMsg="",zoek="",build=null,taste=null,confirmReset=false;
 const h=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
 
 function record(q,ok){
   const s=store.stats[q.code]||(store.stats[q.code]={g:0,t:0});s.t++;if(ok)s.g++;
   const m=store.miss[q.key]||0;
   if(ok){if(m>1)store.miss[q.key]=m-1;else delete store.miss[q.key]}else store.miss[q.key]=m+1;
+  tick();
+  // Foute vragen bewaren we letterlijk, zodat je ze later gericht kunt herhalen; goed beantwoord = van de lijst.
+  if(q.q&&q.opts&&!q.notes){const i=store.wrong.findIndex(w=>w.q===q.q);
+    if(!ok&&i<0){store.wrong.push({code:q.code,topic:q.topic,key:q.key,q:q.q,r:q.opts[q.a],w:q.opts.filter((_,k)=>k!==q.a),why:q.why,src:q.src});if(store.wrong.length>80)store.wrong.shift()}
+    else if(ok&&i>=0)store.wrong.splice(i,1)}
   save();
 }
 
+const EXAM_MIN=75;
+function examQuiz(){
+  const qs=makeQuiz(QUIZ_TOPICS.map(t=>t.id),54),seen=new Set();
+  for(let i=0;i<200&&seen.size<6;i++){const t=tasteQ();if(!t||seen.has(t.g.n))continue;seen.add(t.g.n);
+    qs.push({code:"6a.3",topic:"proeven",key:"taste:"+t.g.n,q:"Welke wijn zit in het glas?",notes:t.notes,opts:t.opts,a:t.a,why:`Dit is het profiel van ${t.g.n.toLowerCase()}: ${t.g.ar.join(", ")}.`,src:"Boek p. "+t.g.p+" en de SDEN-wijnlijst"})}
+  return {qs,i:0,pick:null,log:[],exam:true,start:Date.now(),end:Date.now()+EXAM_MIN*60000};
+}
+function examScore(){const L=quiz.log,th=L.filter(l=>l.ok&&!l.q.notes).length,pr=L.filter(l=>l.ok&&l.q.notes).length;return {th,pr,tot:th+pr,pass:th+pr>=36&&pr>=2}}
+function finishExam(){if(quiz.done)return;quiz.done=true;quiz.i=quiz.qs.length;quiz.used=Math.min(EXAM_MIN*60000,Date.now()-quiz.start);if(examScore().pass){store.examPass=(store.examPass||0)+1;save()}}
+const clock=ms=>{ms=Math.max(0,ms);const m=Math.floor(ms/60000),sec=Math.floor(ms%60000/1000);return m+":"+String(sec).padStart(2,"0")};
 function vQuiz(){
   if(!quiz){
+    const nw=store.wrong.length;
     return `<section class="card">
       <h2>Overhoren in examenstijl</h2>
       <p class="muted small">Drie antwoorden per vraag, net als op het examen. Wat je fout hebt, komt vaker terug.</p>
@@ -495,26 +614,43 @@ function vQuiz(){
         ${[10,20,54].map(n=>`<button class="chip" data-act="count" data-n="${n}" aria-pressed="${setup.n===n}">${n}${n===54?" (examenlengte)":""}</button>`).join("")}
       </div></div>
       <button class="btn wide" data-act="start" ${setup.topics.length?"":"disabled"}>Start</button>
-    </section>`;
+    </section>
+    <section class="card"><h2>Je fouten herhalen</h2>
+      <p class="muted small">${nw?`Er ${nw===1?"staat 1 vraag":"staan "+nw+" vragen"} klaar die je eerder fout had. Heb je er een goed, dan verdwijnt hij van de lijst.`:"Hier komen de vragen die je fout beantwoordt. Nu is de lijst leeg."}</p>
+      <button class="btn ghost wide" data-act="q-wrong" ${nw?"":"disabled"}>Oefen je fouten${nw?" ("+Math.min(nw,20)+")":""}</button></section>
+    <section class="card"><h2>Oefenexamen</h2>
+      <p class="muted small">Zoals het echte examen: 54 theorievragen en 6 proefvragen in ${EXAM_MIN} minuten. Je ziet pas aan het eind wat goed was. De vragen komen uit de stof die nu in de app zit; wijnbouw, wijnbereiding en wet ontbreken nog.</p>
+      <button class="btn ghost wide" data-act="q-exam">Start oefenexamen</button>
+      ${store.examPass?`<p class="small muted">Al ${store.examPass} keer gehaald.</p>`:""}</section>`;
   }
   if(quiz.i>=quiz.qs.length){
-    const good=quiz.log.filter(l=>l.ok).length,wrong=quiz.log.filter(l=>!l.ok);
+    const good=quiz.log.filter(l=>l.ok).length,wrong=quiz.log.filter(l=>!l.ok),N=quiz.qs.length,open=N-quiz.log.length;
+    const list=wrong.length?`<section class="card"><h3>Nog eens bekijken</h3>${wrong.map(l=>`<div class="res"><p><strong>${h(l.q.q)}</strong></p>${l.q.notes?`<p class="small muted">${l.q.notes.map(x=>x[0]+": "+h(x[1])).join(" · ")}</p>`:""}<p class="small"><span class="pill no">Jij</span> ${h(l.q.opts[l.pick])}</p><p class="small"><span class="pill ok">Goed</span> ${h(l.q.opts[l.q.a])}</p><p class="muted small">${h(l.q.why)}</p></div>`).join("")}</section>`:"";
+    if(quiz.exam){const e=examScore();
+      return `<section class="card result ${e.pass?"pass":""}">
+        <h2>${e.pass?"Geslaagd!":"Nog niet geslaagd"}</h2>
+        <p class="big">${e.tot} <span>van 60</span></p>
+        <div class="bar"><i style="width:${Math.round(100*e.tot/60)}%"></i></div>
+        <dl><dt>Theorie</dt><dd>${e.th} van 54</dd><dt>Proeven</dt><dd>${e.pr} van 6 ${e.pr<2?"(minstens 2 nodig)":""}</dd><dt>Tijd</dt><dd>${quiz.timeup?"de tijd was om":clock(quiz.used)+" gebruikt"}${open?`, ${open} niet beantwoord`:""}</dd></dl>
+        <p class="muted small">Nodig: 36 van de 60 goed, waarvan minstens 2 proefvragen.</p>
+        <button class="btn wide" data-act="q-exam">Nog een oefenexamen</button><button class="btn ghost wide" data-act="stop">Terug</button>
+      </section>${list}`}
     return `<section class="card">
-      <h2>${good} van de ${quiz.qs.length} goed</h2>
-      <div class="bar"><i style="width:${Math.round(100*good/quiz.qs.length)}%"></i></div>
-      <p class="muted small">Op het examen heb je 36 van de 60 nodig, dat is 60%. Jij zit nu op ${Math.round(100*good/quiz.qs.length)}%.</p>
-      <button class="btn wide" data-act="again">Nieuwe ronde</button>
-    </section>
-    ${wrong.length?`<section class="card"><h3>Nog eens bekijken</h3>${wrong.map(l=>`<div class="res"><p><strong>${h(l.q.q)}</strong></p><p class="small"><span class="pill no">Jij</span> ${h(l.q.opts[l.pick])}</p><p class="small"><span class="pill ok">Goed</span> ${h(l.q.opts[l.q.a])}</p><p class="muted small">${h(l.q.why)}</p></div>`).join("")}</section>`:""}`;
+      <h2>${good} van de ${N} goed</h2>
+      <div class="bar"><i style="width:${Math.round(100*good/N)}%"></i></div>
+      <p class="muted small">${good===N?"Foutloos. Mooi gedaan! ":""}Op het examen heb je 36 van de 60 nodig, dat is 60%. Jij zit nu op ${Math.round(100*good/N)}%.</p>
+      <button class="btn wide" data-act="${quiz.fromWrong?"stop":"again"}">${quiz.fromWrong?"Klaar":"Nieuwe ronde"}</button>
+    </section>${list}`;
   }
   const q=quiz.qs[quiz.i],done=quiz.pick!==null;
-  return `<div class="row between small muted"><span>Vraag ${quiz.i+1} van ${quiz.qs.length}</span><span class="pill code">toetsterm ${q.code}</span></div>
+  return `<div class="row between small muted"><span>${quiz.exam?"Oefenexamen · vraag":quiz.fromWrong?"Fouten herhalen · vraag":"Vraag"} ${quiz.i+1} van ${quiz.qs.length}</span>${quiz.exam?`<span class="pill code" id="clock">${clock(quiz.end-Date.now())}</span>`:`<span class="pill code">toetsterm ${q.code}</span>`}</div>
     <div class="bar"><i style="width:${Math.round(100*quiz.i/quiz.qs.length)}%"></i></div>
     <section class="card"><h2>${h(q.q)}</h2>
+      ${q.notes?`<dl>${q.notes.map(x=>`<dt>${x[0]}</dt><dd>${h(x[1])}</dd>`).join("")}</dl>`:""}
       <div class="opts">${q.opts.map((o,i)=>`<button class="opt ${done?(i===q.a?"right":i===quiz.pick?"wrong":""):""}" data-act="answer" data-i="${i}" ${done?"disabled":""}><b>${ABC[i]}</b><span>${h(o)}</span></button>`).join("")}</div>
       ${done?`<p class="note"><strong>${quiz.pick===q.a?"Goed.":"Niet goed."}</strong> ${h(q.why)}</p><p class="src">Bron: ${h(q.src)}</p><button class="btn wide" data-act="next">${quiz.i+1<quiz.qs.length?"Volgende vraag":"Bekijk je score"}</button><button class="link" data-act="flag">${quiz.flagged?"Gemeld. Je meldingen staan op Start.":"Klopt dit niet met het boek? Meld het"}</button>`:""}
     </section>
-    <button class="btn ghost" data-act="stop">Stoppen</button>`;
+    <button class="btn ghost" data-act="stop">${quiz.exam?"Examen afbreken":"Stoppen"}</button>`;
 }
 
 function newBuild(g){
@@ -694,26 +830,56 @@ function vTaste(){
 }
 
 function flagText(){return store.flags.map((f,i)=>`${i+1}. ${f.q}\n   In de app: ${f.a}\n   Bron: ${f.src}`).join("\n")}
+// Zoeken over druiven, kaartgebieden en termen.
+function searchHits(term){
+  const t=plain(term.trim());if(t.length<2)return [];
+  const out=[],hit=x=>plain(x).includes(t);
+  for(const g of G)if(hit(g.n)||g.syn.some(hit))out.push(["s-grape",g.n,g.n,"druif"+(g.syn.some(hit)&&!hit(g.n)?" · ook: "+g.syn.filter(hit).join(", "):"")]);
+  for(const [land,D] of Object.entries(GEO))for(const r of all(D))if(hit(r.n))out.push(["s-region",land+"|"+r.n,r.n,"kaart · "+(r.parent?r.parent+", ":"")+land]);
+  for(const x of TERMS)if(hit(x[0]))out.push([null,"",x[0],"term · hoort bij "+x[1]]);
+  return out.slice(0,14);
+}
+const hitsHTML=term=>{const H=searchHits(term);return H.length?H.map(x=>x[0]?`<button class="hit2" data-act="${x[0]}" data-n="${h(x[1])}"><strong>${h(x[2])}</strong><span>${h(x[3])}</span></button>`:`<div class="hit2"><strong>${h(x[2])}</strong><span>${h(x[3])}</span></div>`).join(""):term.trim().length>1?`<p class="muted small">Niets gevonden.</p>`:""};
 function vStart(){
-  const tiles=[["overhoren","Overhoren","Vragen met 3 antwoorden, zoals op het examen"],["opbouwen","Druiven","Bouw zelf een profiel en kijk het na"],["kaart","Kaart",Object.keys(GEO).join(", ")],["proeven","Proeven","Herken het glas en houd je proeflijst bij"]];
+  const tiles=[["overhoren","Overhoren","Vragen, je fouten herhalen en een oefenexamen"],["opbouwen","Druiven","Bouw zelf een profiel en kijk het na"],["kaart","Kaart",Object.keys(GEO).join(", ")],["proeven","Proeven","Herken het glas en houd je proeflijst bij"]];
   const rows=[...TOPICS,{label:"Proeven",code:"6a.3"}].map(t=>{const s=store.stats[t.code]||{g:0,t:0},p=s.t?Math.round(100*s.g/s.t):0;
     return `<div class="stat"><div class="row between"><span>${t.label} <span class="pill code">${t.code}</span></span><strong>${s.t?p+"%":"nog niet geoefend"}</strong></div><div class="bar"><i style="width:${p}%"></i></div>${s.t?`<span class="muted small">${s.g} van ${s.t} goed</span>`:""}</div>`}).join("");
-  const built=Object.keys(store.built),full=built.filter(n=>store.built[n]===100).length;
+  const built=Object.keys(store.built),full=built.filter(n=>store.built[n]===100).length,nt=Object.keys(store.tasted).length;
   const weak=[...new Set(Object.entries(store.miss).sort((a,b)=>b[1]-a[1]).slice(0,6).map(e=>e[0].split(":")[1]))];
+  const st=streak(),nu=store.days[today()]||0,GOAL=20,tot=Object.values(store.stats).reduce((a,x)=>a+x.t,0);
+  const week=[...Array(7)].map((_,i)=>{const d=new Date();d.setDate(d.getDate()-6+i);return `<span><i class="${store.days[dkey(d)]?"on":""}"></i>${["zo","ma","di","wo","do","vr","za"][d.getDay()]}</span>`}).join("");
+  let left="";if(store.exam){const n=Math.ceil((new Date(store.exam+"T00:00:00")-new Date(today()+"T00:00:00"))/864e5);left=n>1?`Nog ${n} dagen tot je examen.`:n===1?"Morgen is je examen. Succes!":n===0?"Vandaag is je examen. Succes!":"Je examendatum is voorbij."}
+  const g=G[hashN(today())%G.length];
+  const medals=[["Eerste ronde",tot>=10],["100 vragen",tot>=100],["500 vragen",tot>=500],["7 dagen op rij",(store.best||0)>=7],["Alle druiven opgebouwd",built.length>=G.length],["Proeflijst compleet",nt>=26],["Oefenexamen gehaald",store.examPass>0]];
   return `<div class="hub">${tiles.map(t=>`<button class="tile" data-act="go" data-tab="${t[0]}"><strong>${t[1]}</strong><span>${t[2]}</span></button>`).join("")}</div>
-  <p class="muted small">Komt nog: wijn maken, wet en etiket, filmpjes, oefenexamen en de koppeling met Mijn Wijnboek.</p>
+  <section class="card"><div class="row between"><h2>Vandaag</h2><span class="pill ${st?"ok":"code"}">${st?st+(st===1?" dag":" dagen")+" op rij":"begin je reeks"}</span></div>
+    <div class="stat"><div class="row between"><span>${nu} ${nu===1?"vraag":"vragen"} vandaag</span><strong>${nu>=GOAL?"Dagdoel gehaald":"doel: "+GOAL}</strong></div><div class="bar"><i style="width:${Math.min(100,Math.round(100*nu/GOAL))}%"></i></div></div>
+    <div class="week">${week}</div>
+    ${store.wrong.length?`<button class="btn ghost wide" data-act="q-wrong">Oefen je fouten (${Math.min(20,store.wrong.length)})</button>`:""}
+    <label class="row between small"><span>${left||"Wanneer is je examen?"}</span><input type="date" id="examdate" value="${h(store.exam||"")}" aria-label="Examendatum"></label>
+  </section>
+  <section class="card"><h2>Zoeken</h2><input type="search" id="zoek" value="${h(zoek)}" placeholder="Druif, gebied of term" aria-label="Zoek een druif, gebied of term"><div id="zoekres">${hitsHTML(zoek)}</div></section>
+  <section class="card"><h3>Druif van de dag</h3><div class="dag">${plate(g,120)}<div><h2><i class="swatch ${g.c}"></i>${h(g.n)}</h2><p class="small muted">${h(g.ar.slice(0,4).join(", "))}</p><button class="chip" data-act="s-grape" data-n="${h(g.n)}">Bekijk</button></div></div></section>
   <section class="card"><h2>Waar sta je?</h2>${rows}
-    <dl><dt>Druivenprofielen</dt><dd>${built.length} van 35 gedaan, ${full} foutloos</dd><dt>Proeflijst</dt><dd>${Object.keys(store.tasted).length} van 26</dd></dl>
-    ${weak.length?`<p class="small"><span class="muted">Komt vaker terug:</span> ${h(weak.join(", "))}</p>`:""}</section>
+    <dl><dt>Druivenprofielen</dt><dd>${built.length} van ${G.length} gedaan, ${full} foutloos</dd><dt>Proeflijst</dt><dd>${nt} van 26</dd></dl>
+    ${weak.length?`<p class="small"><span class="muted">Komt vaker terug:</span> ${h(weak.join(", "))}</p>`:""}
+    <h3>Mijlpalen</h3><div class="row">${medals.map(m=>`<span class="pill ${m[1]?"ok":"dim"}">${m[1]?"✓ ":""}${m[0]}</span>`).join("")}</div></section>
   ${store.flags.length?`<section class="card"><div class="row between"><h2>Meldingen</h2><span class="muted small">${store.flags.length}</span></div>
     <p class="muted small">Dit vond jij niet kloppen met het boek. Kopieer de lijst en plak hem in de chat, dan wordt het aangepast.</p>
     <textarea id="flags" readonly>${h(flagText())}</textarea>
     <div class="row"><button class="btn" data-act="copyflags">${copied?"Gekopieerd":"Kopieer lijst"}</button><button class="btn ghost" data-act="clearflags">Lijst legen</button></div></section>`:""}
   <section class="card"><h3>Het examen</h3><dl><dt>Vragen</dt><dd>60 meerkeuze: 54 theorie, 6 proef</dd><dt>Tijd</dt><dd>75 minuten</dd><dt>Geslaagd</dt><dd>36 van 60 goed, waarvan minstens 2 proefvragen</dd></dl>
     <p class="muted small">Aantal vragen volgens het boek. Tijd en slaaggrens volgens jedewijn.nl, nog niet bij SDEN zelf nagekeken.</p></section>
-  <section class="card"><p class="muted small">Je voortgang staat alleen in deze browser.</p>
+  <p class="muted small">Komt nog: wijn maken, wet en etiket, filmpjes en de koppeling met Mijn Wijnboek.</p>
+  <section class="card"><h3>Instellingen</h3>
+    <div class="field"><span class="small">Weergave</span><div class="row">${[["auto","Automatisch"],["light","Licht"],["dark","Donker"]].map(t=>`<button class="chip" data-act="theme" data-id="${t[0]}" aria-pressed="${(store.theme||"auto")===t[0]}">${t[1]}</button>`).join("")}</div></div>
+    <div class="field"><span class="small">Back-up van je voortgang</span><p class="muted small">Je voortgang staat alleen in deze browser. Met een back-up kun je hem bewaren of meenemen naar een ander toestel: maak de back-up, bewaar de tekst, en plak hem later hier terug.</p>
+      <textarea id="bk" placeholder="Plak hier een back-up om hem terug te zetten">${h(bkText)}</textarea>
+      ${bkMsg?`<p class="note small">${h(bkMsg)}</p>`:""}
+      <div class="row"><button class="btn ghost" data-act="bk-make">Maak back-up</button><button class="btn ghost" data-act="bk-load">Zet terug</button></div></div>
     ${confirmReset?`<div class="row"><button class="btn" data-act="reset-yes">Ja, wis alles</button><button class="btn ghost" data-act="reset-no">Annuleren</button></div>`:`<button class="btn ghost" data-act="reset">Voortgang wissen</button>`}</section>`;
 }
+function applyTheme(){const t=store.theme,R=document.documentElement;if(t==="light"||t==="dark")R.dataset.theme=t;else delete R.dataset.theme}
 
 /* ---------- Kaart ---------- */
 // Reliëfondergrond: de eerste dienst die tegels levert, wordt gebruikt.
@@ -1179,7 +1345,7 @@ function hookTiles(){
 function render(){
   view.innerHTML=tab==="start"?vStart():tab==="overhoren"?vQuiz():tab==="opbouwen"?vBuild():tab==="kaart"?vGeo():vTaste();
   if(tab==="kaart"){hookTiles();hookMap()}
-  if(tab==="opbouwen")hookPlates();
+  if(tab==="opbouwen"||tab==="start")hookPlates();
   document.querySelectorAll("nav button").forEach(b=>{if(b.dataset.tab===tab)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});
 }
 function toggle(arr,v){const i=arr.indexOf(v);if(i<0)arr.push(v);else arr.splice(i,1)}
@@ -1192,7 +1358,18 @@ view.addEventListener("click",e=>{
   if(a==="topic")toggle(setup.topics,d.id);
   else if(a==="count")setup.n=+d.n;
   else if(a==="start"||a==="again"){quiz={qs:makeQuiz(setup.topics,setup.n),i:0,pick:null,log:[]};scroll=true}
-  else if(a==="answer"){const q=quiz.qs[quiz.i];quiz.pick=+d.i;const ok=quiz.pick===q.a;quiz.log.push({q,pick:quiz.pick,ok});record(q,ok)}
+  else if(a==="answer"){const q=quiz.qs[quiz.i];quiz.pick=+d.i;const ok=quiz.pick===q.a;quiz.log.push({q,pick:quiz.pick,ok});record(q,ok);
+    if(quiz.exam){quiz.i++;quiz.pick=null;if(quiz.i>=quiz.qs.length)finishExam();scroll=true}}
+  else if(a==="q-wrong"){const qs=shuffle(store.wrong).slice(0,20).map(w=>{const opts=shuffle([w.r,...w.w]);return {code:w.code,topic:w.topic,key:w.key,q:w.q,opts,a:opts.indexOf(w.r),why:w.why,src:w.src}});
+    if(qs.length){quiz={qs,i:0,pick:null,log:[],fromWrong:true};tab="overhoren";try{location.hash=tab}catch(e){}scroll=true}}
+  else if(a==="q-exam"){quiz=examQuiz();scroll=true}
+  else if(a==="s-grape"){tab="opbouwen";build=null;gview=d.n;zoek="";try{location.hash=tab}catch(e){}scroll=true}
+  else if(a==="s-region"){const [land,n]=d.n.split("|"),D=GEO[land],r=all(D).find(x=>x.n===n);tab="kaart";zoek="";geo.land=land;geo.quiz=null;geo.sel=n;geo.sec=D.sections[0][0];
+    if(r){fitBox(regionBox(r));geo.z=Math.max(geo.z,(r.zl||D.zdeep||ZPLACES)+.2)}try{location.hash=tab}catch(e){}scroll=true}
+  else if(a==="theme"){store.theme=d.id;save();applyTheme()}
+  else if(a==="bk-make"){bkText=JSON.stringify(store);bkMsg="Back-up gemaakt. Kopieer de tekst hierboven en bewaar hem, bijvoorbeeld in een notitie of een mail aan jezelf.";try{navigator.clipboard.writeText(bkText).then(()=>{bkMsg="Back-up gekopieerd. Plak hem in een notitie of een mail aan jezelf om hem te bewaren.";render()}).catch(()=>{})}catch(e){}}
+  else if(a==="bk-load"){const el=document.getElementById("bk"),v=el?el.value.trim():"";bkText=v;
+    try{const o=JSON.parse(v);if(!o||typeof o!=="object"||!o.stats)throw 0;store=Object.assign(fresh(),o);save();applyTheme();bkMsg="Teruggezet. Je voortgang is weer zoals in de back-up."}catch(e){bkMsg=v?"Dit is geen geldige back-up. Plak de hele tekst, van { tot en met }.":"Plak eerst de tekst van je back-up in het vak."}}
   else if(a==="next"){quiz.i++;quiz.pick=null;quiz.flagged=false;scroll=true}
   else if(a==="stop"){quiz=null;scroll=true}
   else if(a==="grape"){newBuild(byName(d.n));scroll=true}
@@ -1206,7 +1383,7 @@ view.addEventListener("click",e=>{
   else if(a==="b-zuur")build.sel.zuur=d.v;
   else if(a==="b-tann")build.sel.tann=d.v;
   else if(a==="check"){checkBuild();scroll=true}
-  else if(a==="t-answer"){taste.pick=+d.i;const s=store.stats["6a.3"]||(store.stats["6a.3"]={g:0,t:0});s.t++;if(taste.pick===taste.q.a)s.g++;save()}
+  else if(a==="t-answer"){taste.pick=+d.i;const s=store.stats["6a.3"]||(store.stats["6a.3"]={g:0,t:0});s.t++;if(taste.pick===taste.q.a)s.g++;tick();save()}
   else if(a==="t-next"){taste=null;scroll=true}
   else if(a==="tasted"){if(store.tasted[d.i])delete store.tasted[d.i];else store.tasted[d.i]=true;save()}
   else if(a==="go"){tab=d.tab;try{location.hash=tab}catch(e){}scroll=true}
@@ -1229,10 +1406,14 @@ view.addEventListener("click",e=>{
   else if(a==="g-sec")geo.sec=d.id;
   else if(a==="reset")confirmReset=true;
   else if(a==="reset-no")confirmReset=false;
-  else if(a==="reset-yes"){store={stats:{},miss:{},built:{},tasted:{},flags:[]};save();confirmReset=false}
+  else if(a==="reset-yes"){const t=store.theme;store=fresh();store.theme=t;save();confirmReset=false;bkText="";bkMsg=""}
   render();if(scroll)top();
 });
-load();
+view.addEventListener("input",e=>{if(e.target.id==="zoek"){zoek=e.target.value;const r=document.getElementById("zoekres");if(r)r.innerHTML=hitsHTML(zoek)}});
+view.addEventListener("change",e=>{if(e.target.id==="examdate"){store.exam=e.target.value||"";save();render()}});
+// Klok van het oefenexamen: alleen het klokje bijwerken; is de tijd om, dan stopt het examen.
+setInterval(()=>{if(!quiz||!quiz.exam||quiz.done)return;const left=quiz.end-Date.now();if(left<=0){quiz.timeup=true;finishExam();if(tab==="overhoren"){render();top()}}else{const c=document.getElementById("clock");if(c)c.textContent=clock(left)}},1000);
+load();applyTheme();
 const start=(location.hash||"").slice(1);if(["start","overhoren","opbouwen","kaart","proeven"].includes(start))tab=start;
 render();
 }
