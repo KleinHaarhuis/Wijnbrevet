@@ -81,6 +81,16 @@ button:focus-visible{outline:3px solid var(--leaf);outline-offset:2px}
 .pill.no{background:var(--bad-bg);color:var(--bad)}
 .pill.half{background:var(--warn-bg);color:var(--warn)}
 .pill.code{background:transparent;border:1px solid var(--line);color:var(--muted);font-variant-numeric:tabular-nums}
+.wrow{display:flex;gap:10px;align-items:center;border-top:1px solid var(--line);padding:9px 0}
+.wrow img{width:38px;height:50px;object-fit:cover;border-radius:6px;flex:none;background:var(--paper)}
+.wrow>div{flex:1;min-width:0;display:flex;flex-direction:column}.wrow .swatch{margin:0 14px}
+.check small{display:block;font-size:.78rem;color:var(--leaf);font-weight:600}
+a.btn{text-decoration:none;display:flex;align-items:center;justify-content:center}
+.map .wpin{cursor:pointer}.map .wpin circle{stroke:var(--surface);stroke-width:2px;vector-effect:non-scaling-stroke;fill:var(--accent)}
+.map .wpin.r circle{fill:var(--rose)}.map .wpin.w circle{fill:var(--gold)}
+.map .wpin.try circle{fill:var(--surface);stroke:var(--accent)}
+.map .wpin .tap{fill:transparent!important;stroke:none!important;pointer-events:all}
+.map .wpin.on circle:last-child{stroke:var(--ink);stroke-width:3px}
 .pill.dim{background:transparent;border:1px dashed var(--line);color:var(--muted);font-weight:500}
 .week{display:flex;gap:6px}.week span{flex:1;text-align:center;font-size:.72rem;color:var(--muted)}
 .week i{display:block;height:8px;border-radius:4px;background:var(--line);margin-bottom:3px}.week i.on{background:var(--leaf)}
@@ -750,6 +760,7 @@ function vGrape(g){
     ${g.wg.length?`<ul class="list">${g.wg.map(w=>`<li>${h(w)}</li>`).join("")}</ul>`:""}
   </section>
   <section class="card"><h3>In de kelder</h3><ul class="list">${g.k.map(w=>`<li>${h(w)}</li>`).join("")}</ul></section>
+  ${cellar.length?(()=>{const W=winesOf(g);return `<section class="card"><h3>Jouw wijnen met deze druif</h3>${W.length?W.slice(0,6).map(wineRow).join("")+(W.length>6?`<p class="small muted">En nog ${W.length-6} meer in Mijn Wijnboek.</p>`:""):`<p class="small muted">Nog geen wijn van deze druif in Mijn Wijnboek.</p>`}</section>`})():""}
   <section class="card tasting"><h3>Zelf proeven</h3><p>${h(g.proef)}</p><p class="small muted">Twee wijnen naast elkaar: wat is hetzelfde, wat verschilt?</p></section>
   <p class="src">Inhoud: boek p. ${g.p}. Aroma's licht gelijkgetrokken.${p?"":" Voor deze druif is geen plaat uit 1901-1910 gevonden, daarom een getekende tros."}</p>`;
 }
@@ -815,7 +826,7 @@ function vBuild(){
 
 function vTaste(){
   if(!taste)taste={q:tasteQ(),pick:null};
-  const t=taste,q=t.q,done=t.pick!==null,n=Object.keys(store.tasted).length;
+  const t=taste,q=t.q,done=t.pick!==null,n=tastedCount();
   let idx=0;
   return `<section class="card"><h2>Welke wijn zit in het glas?</h2>
     <p class="muted small">Op het examen kies je bij elk van de 6 glazen uit 3 wijnen. Hier oefen je de redenering met het profiel uit het boek. Echt proeven blijft nodig.</p>
@@ -824,8 +835,9 @@ function vTaste(){
     ${done?`<p class="note"><strong>${t.pick===q.a?"Goed.":"Niet goed."}</strong> Dit is het profiel van ${h(q.g.n.toLowerCase())}: ${h(q.g.ar.join(", "))}; ${sym(q.g.z)} zuur${q.g.t?", "+sym(q.g.t)+" tannine":""}.</p><button class="btn wide" data-act="t-next">Volgend glas</button>`:""}
   </section>
   <section class="card"><div class="row between"><h2>Proeflijst voor het examen</h2><span class="muted small">${n} van 26</span></div>
-    <p class="muted small">De wijnen waaruit SDEN de proefglazen kiest. Vink af wat je bewust geproefd hebt.</p>
-    ${LIST.map(grp=>`<div><h3>${grp[0]}</h3>${grp[1].map(w=>{const i=idx++;return `<button class="check" data-act="tasted" data-i="${i}" aria-pressed="${!!store.tasted[i]}"><i>${store.tasted[i]?"✓":""}</i><span>${h(w)}</span></button>`}).join("")}</div>`).join("")}
+    <p class="muted small">De wijnen waaruit SDEN de proefglazen kiest. Vink af wat je bewust geproefd hebt. Wat in Mijn Wijnboek staat, wordt vanzelf afgevinkt.</p>
+    ${LIST.map(grp=>`<div><h3>${grp[0]}</h3>${grp[1].map(w=>{const i=idx++,m=proefMatch(i),on=!!store.tasted[i]||m.length>0;return `<button class="check" data-act="tasted" data-i="${i}" aria-pressed="${on}"><i>${on?"✓":""}</i><span>${h(w)}${m.length?`<small>Mijn Wijnboek: ${h(m.slice(0,2).map(x=>x.n).join(", "))}${m.length>2?" en "+(m.length-2)+" meer":""}</small>`:""}</span></button>`}).join("")}</div>`).join("")}
+    ${cellar.length?`<p class="src">De wijnen uit Mijn Wijnboek zijn automatisch herkend op land, streek, druif en type. Dat is een schatting; je kunt ook zelf afvinken.</p>`:""}
   </section>`;
 }
 
@@ -844,7 +856,7 @@ function vStart(){
   const tiles=[["overhoren","Overhoren","Vragen, je fouten herhalen en een oefenexamen"],["opbouwen","Druiven","Bouw zelf een profiel en kijk het na"],["kaart","Kaart",Object.keys(GEO).join(", ")],["proeven","Proeven","Herken het glas en houd je proeflijst bij"]];
   const rows=[...TOPICS,{label:"Proeven",code:"6a.3"}].map(t=>{const s=store.stats[t.code]||{g:0,t:0},p=s.t?Math.round(100*s.g/s.t):0;
     return `<div class="stat"><div class="row between"><span>${t.label} <span class="pill code">${t.code}</span></span><strong>${s.t?p+"%":"nog niet geoefend"}</strong></div><div class="bar"><i style="width:${p}%"></i></div>${s.t?`<span class="muted small">${s.g} van ${s.t} goed</span>`:""}</div>`}).join("");
-  const built=Object.keys(store.built),full=built.filter(n=>store.built[n]===100).length,nt=Object.keys(store.tasted).length;
+  const built=Object.keys(store.built),full=built.filter(n=>store.built[n]===100).length,nt=tastedCount();
   const weak=[...new Set(Object.entries(store.miss).sort((a,b)=>b[1]-a[1]).slice(0,6).map(e=>e[0].split(":")[1]))];
   const st=streak(),nu=store.days[today()]||0,GOAL=20,tot=Object.values(store.stats).reduce((a,x)=>a+x.t,0);
   const week=[...Array(7)].map((_,i)=>{const d=new Date();d.setDate(d.getDate()-6+i);return `<span><i class="${store.days[dkey(d)]?"on":""}"></i>${["zo","ma","di","wo","do","vr","za"][d.getDay()]}</span>`}).join("");
@@ -860,6 +872,7 @@ function vStart(){
   </section>
   <section class="card"><h2>Zoeken</h2><input type="search" id="zoek" value="${h(zoek)}" placeholder="Druif, gebied of term" aria-label="Zoek een druif, gebied of term"><div id="zoekres">${hitsHTML(zoek)}</div></section>
   <section class="card"><h3>Druif van de dag</h3><div class="dag">${plate(g,120)}<div><h2><i class="swatch ${g.c}"></i>${h(g.n)}</h2><p class="small muted">${h(g.ar.slice(0,4).join(", "))}</p><button class="chip" data-act="s-grape" data-n="${h(g.n)}">Bekijk</button></div></div></section>
+  ${cellarCard()}
   <section class="card"><h2>Waar sta je?</h2>${rows}
     <dl><dt>Druivenprofielen</dt><dd>${built.length} van ${G.length} gedaan, ${full} foutloos</dd><dt>Proeflijst</dt><dd>${nt} van 26</dd></dl>
     ${weak.length?`<p class="small"><span class="muted">Komt vaker terug:</span> ${h(weak.join(", "))}</p>`:""}
@@ -878,6 +891,79 @@ function vStart(){
       ${bkMsg?`<p class="note small">${h(bkMsg)}</p>`:""}
       <div class="row"><button class="btn ghost" data-act="bk-make">Maak back-up</button><button class="btn ghost" data-act="bk-load">Zet terug</button></div></div>
     ${confirmReset?`<div class="row"><button class="btn" data-act="reset-yes">Ja, wis alles</button><button class="btn ghost" data-act="reset-no">Annuleren</button></div>`:`<button class="btn ghost" data-act="reset">Voortgang wissen</button>`}</section>`;
+}
+/* ---------- Koppeling met Mijn Wijnboek ----------
+   Beide apps staan op hetzelfde adres (kleinhaarhuis.github.io) en delen dus de opslag van de browser.
+   De Trainer LEEST alleen uit de database van Mijn Wijnboek ("wijnboek" > "wines") en schrijft er nooit in. */
+const WB_URL="https://kleinhaarhuis.github.io/Wijnboek/";
+let cellar=[],cellarSig="";
+const purls=new Map();
+function photoURL(w){if(!w.ph)return "";if(!purls.has(w.id)){try{purls.set(w.id,URL.createObjectURL(w.ph))}catch(e){return ""}}return purls.get(w.id)}
+function loadCellar(){
+  try{
+    const r=indexedDB.open("wijnboek");
+    // Bestaat de database nog niet, dan breken we af, zodat we geen lege database aanmaken die Mijn Wijnboek in de weg zit.
+    r.onupgradeneeded=e=>{try{e.target.transaction.abort()}catch(_){}};
+    r.onerror=e=>{try{e.preventDefault()}catch(_){}};
+    r.onsuccess=()=>{const db=r.result;
+      if(!db.objectStoreNames.contains("wines")){db.close();return}
+      const q=db.transaction("wines","readonly").objectStore("wines").getAll();
+      q.onerror=()=>db.close();
+      q.onsuccess=()=>{db.close();
+        const L=(q.result||[]).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).map(w=>{const loc=w.info&&w.info.locatie,la=loc?+loc.lat:NaN,lo=loc?+loc.lon:NaN,ph=(w.photos&&w.photos[0])||w.photo||null;
+          return {id:String(w.id),n:w.naam||"Onbekende wijn",prod:w.producent||"",jaar:w.jaar||"",land:w.land||"",regio:w.regio||"",app:w.appellatie||"",type:w.type||"",dr:(w.druiven||[]).map(String),
+            list:w.list==="proberen"?"proberen":"gedronken",score:(w.mijn&&+w.mijn.score)||0,loc:isFinite(la)&&isFinite(lo)&&(la||lo)?[la,lo]:null,ph:ph instanceof Blob?ph:null,
+            t:plain([w.naam,w.regio,w.appellatie].join(" ")),l:plain(w.land||""),d:(w.druiven||[]).map(plain)}});
+        const sig=L.map(w=>[w.id,w.n,w.list,w.score,w.dr.join("+"),w.loc?w.loc.join(","):""].join("|")).join(";");
+        if(sig!==cellarSig){cellarSig=sig;cellar=L;const busy=(tab==="overhoren"&&quiz)||(tab==="opbouwen"&&build)||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));if(!busy)render()}
+      }};
+  }catch(e){}
+}
+const drunk=()=>cellar.filter(w=>w.list==="gedronken");
+// Welke wijn uit Mijn Wijnboek past bij welke regel van de SDEN-proeflijst? Op volgorde van LIST. Dit is een schatting op land, streek, druif en type.
+const PM=(()=>{const R=(w,re)=>re.test(w.t),L=(w,re)=>re.test(w.l),D=(w,re)=>w.d.some(x=>re.test(x)),T=(w,t)=>w.type===t,sp=/crianza|reserva/;
+  return [
+  w=>R(w,/alsace|elzas/)&&D(w,/gewurz|pinot blanc/),
+  w=>L(w,/austral/)&&T(w,"Wit"),
+  w=>T(w,"Wit")&&!L(w,/duits|oostenrijk/)&&R(w,/bourgogne|chablis|meursault|macon|pouilly-fuisse|montrachet|rully|mercurey|givry|montagny/)&&!D(w,/aligote/),
+  w=>L(w,/chili|chile/)&&T(w,"Wit")&&D(w,/chardonnay|sauvignon blanc/),
+  w=>L(w,/duits/)&&T(w,"Wit")&&D(w,/riesling/),
+  w=>L(w,/nieuw-zeeland|new zealand/)&&D(w,/sauvignon blanc/),
+  w=>R(w,/touraine/)&&D(w,/sauvignon/),
+  w=>L(w,/zuid-afrika|south africa/)&&T(w,"Wit")&&D(w,/chenin|sauvignon blanc/),
+  w=>L(w,/argentin/)&&D(w,/malbec/),
+  w=>L(w,/austral/)&&T(w,"Rood"),
+  w=>R(w,/beaujolais|morgon|fleurie|brouilly|moulin-a-vent|julienas|chenas|chiroubles|regnie|saint-amour/),
+  w=>T(w,"Rood")&&R(w,/bordeaux|medoc|pauillac|margaux|saint-emilion|pomerol|graves|pessac|saint-julien|saint-estephe|fronsac|blaye|listrac|moulis|castillon/),
+  w=>T(w,"Rood")&&!L(w,/duits|oostenrijk/)&&R(w,/bourgogne|cote de nuits|cote de beaune|gevrey|pommard|volnay|mercurey|nuits-saint|beaune|givry|santenay|marsannay/)&&!D(w,/gamay/),
+  w=>(L(w,/verenigde staten|usa|amerika|^vs$/)||R(w,/californi|napa|sonoma|lodi|paso robles/))&&D(w,/zinfandel|cabernet/),
+  w=>L(w,/chili|chile/)&&D(w,/carmenere|merlot/),
+  w=>L(w,/spanje|spain/)&&T(w,"Rood")&&R(w,sp),
+  w=>L(w,/spanje|spain/)&&T(w,"Rood")&&!R(w,sp),
+  w=>R(w,/chianti/)||(R(w,/toscan|tuscan|montalcino/)&&D(w,/sangiovese/)),
+  w=>R(w,/valpolicella|ripasso|amarone/),
+  w=>L(w,/zuid-afrika|south africa/)&&T(w,"Rood"),
+  w=>T(w,"Rood")&&R(w,/rhone|chateauneuf|gigondas|vacqueyras|ventoux|luberon|costieres|languedoc|corbieres|minervois|roussillon|pic saint|saint-chinian|faugeres/)&&D(w,/grenache|garnacha/),
+  w=>R(w,/\bport\b|porto/)&&(T(w,"Versterkt")||L(w,/portugal/)),
+  w=>R(w,/sherry|jerez|\bfino\b|pedro xim|\bpx\b|manzanilla|oloroso|amontillado/),
+  w=>D(w,/musca/)&&(T(w,"Versterkt")||T(w,"Zoet"))&&(L(w,/frankrijk|france/)||R(w,/rivesaltes|beaumes|frontignan|lunel|vin doux/)),
+  w=>(T(w,"Zoet")||T(w,"Wit"))&&R(w,/sauternes|barsac|monbazillac|jurancon|layon|loupiac|cadillac|bonnezeaux|quarts de chaume/),
+  w=>R(w,/spatlese|auslese/)];})();
+const proefMatch=i=>PM[i]?drunk().filter(w=>{try{return PM[i](w)}catch(e){return false}}):[];
+const tastedCount=()=>{let n=0;for(let i=0;i<26;i++)if(store.tasted[i]||proefMatch(i).length)n++;return n};
+// De 14 examendruiven van de SDEN-wijnlijst.
+const EXG=[["chardonnay",/chardonnay/],["gewürztraminer",/gewurz/],["muscat",/musca/],["riesling",/^riesling|rheinriesling/],["sauvignon blanc",/sauvignon blanc/],["cabernet sauvignon",/cabernet sauvignon/],["gamay",/gamay/],["grenache",/grenache|garnacha/],["merlot",/merlot/],["pinot blanc",/pinot blanc|weissburgunder|pinot bianco/],["pinot noir",/pinot noir|spatburgunder|blauburgunder|pinot nero/],["sangiovese",/sangiovese|nielluccio/],["syrah/shiraz",/syrah|shiraz/],["tempranillo",/tempranillo|tinto fino|cencibel|tinta de toro|ull de llebre|aragonez|tinta roriz/]];
+const winesOf=g=>{const names=[g.n,...g.syn].map(plain);return drunk().filter(w=>w.d.some(d=>names.some(n=>d===n||d.includes(n))))};
+const wineRow=w=>`<div class="wrow">${photoURL(w)?`<img src="${photoURL(w)}" alt="">`:`<i class="swatch ${w.type==="Rood"?"b":"w"}"></i>`}<div><strong>${h(w.n)}</strong><span class="small muted">${h([w.prod,w.jaar,w.app||w.regio,w.land].filter(Boolean).join(" · "))}</span></div>${w.score?`<span class="pill code">★ ${w.score}</span>`:w.list==="proberen"?`<span class="pill code">proberen</span>`:""}</div>`;
+function cellarCard(){
+  const G_=drunk(),ex=EXG.filter(e=>G_.some(w=>w.d.some(d=>e[1].test(d)))),miss=EXG.filter(e=>!ex.includes(e)).map(e=>e[0]);
+  let viaWB=0;for(let i=0;i<26;i++)if(proefMatch(i).length)viaWB++;
+  return `<section class="card"><div class="row between"><h2>Mijn Wijnboek</h2><span class="muted small">${cellar.length?G_.length+" geproefd":"gekoppeld"}</span></div>
+    ${cellar.length?`<dl><dt>Examendruiven</dt><dd>${ex.length} van 14 geproefd</dd><dt>Proeflijst</dt><dd>${viaWB} van 26 herkend in je wijnen</dd>${cellar.length-G_.length?`<dt>Wil ik proberen</dt><dd>${cellar.length-G_.length}</dd>`:""}</dl>
+      ${miss.length&&miss.length<14?`<p class="small"><span class="muted">Nog te proeven:</span> ${h(miss.join(", "))}</p>`:""}
+      ${G_.slice(0,3).map(wineRow).join("")}`
+    :`<p class="muted small">Wijnen die je in Mijn Wijnboek opslaat, komen hier vanzelf in beeld: op je proeflijst, bij de druiven en op de kaart. Er zijn nu nog geen wijnen gevonden. Dat klopt ook als je de Trainer ergens anders opent dan op kleinhaarhuis.github.io, of in een andere browser dan Mijn Wijnboek.</p>`}
+    <a class="btn ghost wide" href="${WB_URL}">Open Mijn Wijnboek</a></section>`;
 }
 function applyTheme(){const t=store.theme,R=document.documentElement;if(t==="light"||t==="dark")R.dataset.theme=t;else delete R.dataset.theme}
 
@@ -1228,6 +1314,8 @@ function mapSVG(){
   if(deep&&!q)for(const r of A){if(!shown(r)||geo.z>=kidZ(r))continue;const c=LAB[r.n]||mid(r),[x,y]=P(c[0],c[1]),list=RDR[r.n]||[];
     list.forEach((d,i)=>{const g=grapeOf(d[0]),yy=y+(19+i*13)*s;
       o+=`<g class="grp${g?" link":""}"${g?` data-act="g-grape" data-n="${h(g.n)}"`:""}><circle cx="${f(x-4*s-d[0].length*2.6*s)}" cy="${f(yy-3.3*s)}" r="${f(3.6*s)}" class="${d[1]?"gb":"gw"}"/><text x="${f(x)}" y="${f(yy)}" font-size="${f(10*s)}" stroke-width="${f(3*s)}" text-anchor="middle">${h(d[0])}</text></g>`})}
+  if(geo.mine!==false&&!q)for(const w of cellar){if(!w.loc)continue;const [x,y]=P(w.loc[0],w.loc[1]);
+    o+=`<g class="wpin ${w.type==="Rood"?"r":w.type==="Wit"||w.type==="Mousserend"?"w":"o"}${w.list==="proberen"?" try":""}${geo.wine===w.id?" on":""}" data-act="g-wine" data-id="${h(w.id)}"><circle cx="${f(x)}" cy="${f(y)}" r="${f(13*s)}" class="tap"/><circle cx="${f(x)}" cy="${f(y)}" r="${f(6.5*s)}"/></g>`}
   return o+"</svg>";
 }
 // Schuiven, knijpen, scrollen en dubbeltikken. Tijdens het gebaar schuift en schaalt de tekening; daarna wordt hij scherp opnieuw opgebouwd.
@@ -1326,6 +1414,8 @@ function vGeo(){
   <div class="mapwrap" id="mapwrap">${mapSVG()}<div class="mapctl"><button data-act="g-plus" aria-label="Inzoomen">+</button><button data-act="g-minus" aria-label="Uitzoomen">−</button><button data-act="g-home" aria-label="Heel ${h(D.title)}">⌂</button></div></div>
   <p class="src" id="tilenote">${h(note)} ${h(D.grens)}</p>
   <p class="muted small">Knijp, scroll of dubbeltik om in te zoomen. Ingezoomd verschijnen de deelgebieden, plaatsen en belangrijkste druiven uit het boek. Tik op een onderstreepte druif voor zijn pagina.</p>
+  ${(()=>{const n=cellar.filter(w=>w.loc).length;if(!n||q)return "";const w=geo.mine!==false&&geo.wine&&cellar.find(x=>x.id===geo.wine);
+    return `<div class="row"><button class="chip" data-act="g-mine" aria-pressed="${geo.mine!==false}">Mijn wijnen (${n})</button></div>${w?`<section class="card"><h3>Uit Mijn Wijnboek${w.list==="proberen"?" · wil ik proberen":""}</h3>${wineRow(w)}${w.dr.length?`<p class="small"><span class="muted">Druiven:</span> ${h(w.dr.join(", "))}</p>`:""}</section>`:""}`})()}
   <div class="row"><button class="chip" data-act="g-explore" aria-pressed="${!q}">Verkennen</button><button class="chip" data-act="g-quiz" aria-pressed="${!!q}">${q&&q.i>=n?"Opnieuw overhoren":q&&q.root?"Overhoor me: "+h(q.root):!q&&hasKids?"Overhoor me: "+h(r.n):"Overhoor me"}</button></div>
   ${q?"":`${r?`<section class="card"><div class="row between"><h2>${h(r.n)}</h2><button class="chip" data-act="g-zoom">Zoom in</button></div><dl>${r.parent?`<dt>Ligt in</dt><dd>${h(r.parent)}</dd>`:""}${r.druif?`<dt>Druiven</dt><dd>${h(r.druif)}</dd>`:""}${r.kleur?`<dt>Aandeel</dt><dd>${h(r.kleur)}</dd>`:""}${r.stijl?`<dt>Wijn</dt><dd>${h(r.stijl)}</dd>`:""}${r.ha?`<dt>Wijngaard</dt><dd>${h(r.ha)}</dd>`:""}</dl><p>${h(r.info)}</p></section>`:`<p class="muted small">Tik op een gebied voor uitleg.</p>`}
   <section class="card"><h3>Wat bepaalt het klimaat?</h3><div class="row">${Object.entries(D.layers).map(([k,l])=>`<button class="chip" data-act="g-layer" data-id="${k}" aria-pressed="${geo.layer===k}">${l[0]}</button>`).join("")}</div>
@@ -1399,6 +1489,8 @@ view.addEventListener("click",e=>{
   else if(a==="g-explore")geo.quiz=null;
   else if(a==="g-zoom"){const D=GEO[geo.land],r=all(D).find(x=>x.n===geo.sel);if(r){fitBox(regionBox(r));geo.z=Math.max(geo.z,(r.zl||D.zdeep||ZPLACES)+.2)}try{document.getElementById("mapwrap").scrollIntoView({block:"start",behavior:"smooth"})}catch(e){}}
   else if(a==="g-home")geo.c=null;
+  else if(a==="g-wine"){if(Date.now()-geo.lastMove<450)return;geo.wine=geo.wine===d.id?null:d.id}
+  else if(a==="g-mine"){geo.mine=geo.mine===false;geo.wine=null}
   else if(a==="g-land"){if(geo.land!==d.n){geo.land=d.n;geo.c=null;geo.sel=null;geo.quiz=null;geo.sec=GEO[d.n].sections[0][0]}}
   else if(a==="g-grape"){if(Date.now()-geo.lastMove<450)return;tab="opbouwen";build=null;gview=d.n;try{location.hash=tab}catch(e){}scroll=true}
   else if(a==="g-plus"){zoomBy(2);return}
@@ -1413,7 +1505,8 @@ view.addEventListener("input",e=>{if(e.target.id==="zoek"){zoek=e.target.value;c
 view.addEventListener("change",e=>{if(e.target.id==="examdate"){store.exam=e.target.value||"";save();render()}});
 // Klok van het oefenexamen: alleen het klokje bijwerken; is de tijd om, dan stopt het examen.
 setInterval(()=>{if(!quiz||!quiz.exam||quiz.done)return;const left=quiz.end-Date.now();if(left<=0){quiz.timeup=true;finishExam();if(tab==="overhoren"){render();top()}}else{const c=document.getElementById("clock");if(c)c.textContent=clock(left)}},1000);
-load();applyTheme();
+load();applyTheme();loadCellar();
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)loadCellar()});
 const start=(location.hash||"").slice(1);if(["start","overhoren","opbouwen","kaart","proeven"].includes(start))tab=start;
 render();
 }
