@@ -695,10 +695,13 @@ const PLATES={
 "Pinot noir":["Pinot Noir (Viala Vermorel).jpg"],
 "Sangiovese":["Nieluccio - Ampélographie.png","plaat 'Nielluccio', de Corsicaanse naam"],
 "Syrah":["Syrah - Ampélographie.jpg"],
-"Tempranillo":["Tempranillo Viala et Vermorel.jpg"]
+"Tempranillo":["Tempranillo Viala et Vermorel.jpg"],
+"Riesling":["Riesling - Ampélographie.jpg"],
+"Macabeo":["Maccabeo blanc.jpg", "plaat 'Maccabeo blanc'"],
+"Barbera":["Uva Barbera - Giorgio Gallesio.jpg", "", "Giorgio Gallesio, <i>Pomona Italiana</i> (1817–1839)"]
 };
 // Rechtstreeks naar de miniatuur op upload.wikimedia.org (standaardmaten 120 en 500), zonder omleiding.
-const MD5={"Pinot blanc Chardonnay - Ampélographie.jpg":"2b4b091ef97e29a6a330f14359baffbf","Chenin blanc - Ampélographie.jpg":"7548487d2de8e3696419a2a56dd33bf5","Gewürztramine Viala et Vermorelr.jpg":"c48d5068511f27df79ab0fff5a9840bd","Melon - Ampélographie.jpg":"a03443923f22238e4b2945f5c54b22d9","Muscat blanc - Ampélographie.jpg":"d311e8bd406006b255755aff8eab1390","Pinot blanc - Ampélographie.jpg":"b56dd3e41a5a69a5380f4beacf83cbfc","Pinot gris - Ampélographie.jpg":"be040f7339fb041ead49c0412d1b68ac","Sauvignon - Ampélographie.jpg":"914915eb7bd0b110d82373a5782ed15c","Ugni blanc (Trebbiano) - Ampélographie.jpg":"2b5c1ea33ac1a169f0d8a72a5e8a2fe9","Viognier - Ampélographie.jpg":"7633fde4d37ad4d704e5ff078fecfd3d","Cabernet-franc.jpg":"a4725c598c2ef7e80544ffe6d406924b","Cabernet sauvignon Viala Vermorel.jpg":"0aa7605fc3380d5af2f2c77b3bfdcef6","Carmenère - Ampélographie.jpg":"9494e03ca3e34ab9b34ad40bb3bbf8fc","Petit Gamay - Ampélographie.jpg":"1cdcb770f36602a8d339f82d98f2b5d4","Grenache N.jpg":"bd86d5f32292cf7f00acfbf67e9af5f2","Côt - Ampélographie.jpg":"a575bd469f19d3b584f227342c45e167","Merlot - Amplélographie.jpg":"269a250a4ca40b0a54969c1e7a280729","Mourvèdre - Ampélographie.jpg":"08e3f05fd3bbeeb667713da83af4a0e9","Pinot Noir (Viala Vermorel).jpg":"4772b151a64f07519470b2dec01576f4","Nieluccio - Ampélographie.png":"cb69a8b9907ffaa1ddc60e2be17d5521","Syrah - Ampélographie.jpg":"a601c6a919e518c146591fb320cbfff7","Tempranillo Viala et Vermorel.jpg":"af7b63d0a8aacc0cb9661cba7eeaa111"};
+const MD5={"Pinot blanc Chardonnay - Ampélographie.jpg":"2b4b091ef97e29a6a330f14359baffbf","Chenin blanc - Ampélographie.jpg":"7548487d2de8e3696419a2a56dd33bf5","Gewürztramine Viala et Vermorelr.jpg":"c48d5068511f27df79ab0fff5a9840bd","Melon - Ampélographie.jpg":"a03443923f22238e4b2945f5c54b22d9","Muscat blanc - Ampélographie.jpg":"d311e8bd406006b255755aff8eab1390","Pinot blanc - Ampélographie.jpg":"b56dd3e41a5a69a5380f4beacf83cbfc","Pinot gris - Ampélographie.jpg":"be040f7339fb041ead49c0412d1b68ac","Sauvignon - Ampélographie.jpg":"914915eb7bd0b110d82373a5782ed15c","Ugni blanc (Trebbiano) - Ampélographie.jpg":"2b5c1ea33ac1a169f0d8a72a5e8a2fe9","Viognier - Ampélographie.jpg":"7633fde4d37ad4d704e5ff078fecfd3d","Cabernet-franc.jpg":"a4725c598c2ef7e80544ffe6d406924b","Cabernet sauvignon Viala Vermorel.jpg":"0aa7605fc3380d5af2f2c77b3bfdcef6","Carmenère - Ampélographie.jpg":"9494e03ca3e34ab9b34ad40bb3bbf8fc","Petit Gamay - Ampélographie.jpg":"1cdcb770f36602a8d339f82d98f2b5d4","Grenache N.jpg":"bd86d5f32292cf7f00acfbf67e9af5f2","Côt - Ampélographie.jpg":"a575bd469f19d3b584f227342c45e167","Merlot - Amplélographie.jpg":"269a250a4ca40b0a54969c1e7a280729","Mourvèdre - Ampélographie.jpg":"08e3f05fd3bbeeb667713da83af4a0e9","Pinot Noir (Viala Vermorel).jpg":"4772b151a64f07519470b2dec01576f4","Nieluccio - Ampélographie.png":"cb69a8b9907ffaa1ddc60e2be17d5521","Syrah - Ampélographie.jpg":"a601c6a919e518c146591fb320cbfff7","Tempranillo Viala et Vermorel.jpg":"af7b63d0a8aacc0cb9661cba7eeaa111","Riesling - Ampélographie.jpg":"37ab4c11437df3660da1943a3e1a5117","Maccabeo blanc.jpg":"7aa86e2e6bc551d5fddf4384df0fbd0a","Uva Barbera - Giorgio Gallesio.jpg":"07d10ad4301f7abe4f8903081b553f20"};
 const altUrl=(f,w)=>"https://commons.wikimedia.org/wiki/Special:FilePath/"+encodeURIComponent(f.replace(/ /g,"_"))+"?width="+w;
 const fileUrl=(f,w)=>{const n=f.replace(/ /g,"_"),m=MD5[f],e=encodeURIComponent(n);return m?`https://upload.wikimedia.org/wikipedia/commons/thumb/${m[0]}/${m.slice(0,2)}/${e}/${w}px-${e}`:"https://commons.wikimedia.org/wiki/Special:FilePath/"+e+"?width="+w};
 const filePage=f=>"https://commons.wikimedia.org/wiki/File:"+encodeURIComponent(f.replace(/ /g,"_"));
@@ -744,7 +747,7 @@ function vGrape(g){
       <p class="small">${h(g.hT)}</p>
       <button class="btn" data-act="grape" data-n="${h(g.n)}">Test jezelf eerst</button>
       ${score!==undefined?`<p class="small muted">Beste score: ${score}%</p>`:""}</div>
-    <figure>${plate(g,500)}<figcaption id="platecredit" class="src" hidden>${p?`Viala &amp; Vermorel, <i>Ampélographie</i> (1901–1910)${p[1]?", "+h(p[1]):""}. Publiek domein, <a href="${filePage(p[0])}">Wikimedia Commons</a>.`:""}</figcaption></figure>
+    <figure>${plate(g,500)}<figcaption id="platecredit" class="src" hidden>${p?`${p[2]||"Viala &amp; Vermorel, <i>Ampélographie</i> (1901–1910)"}${p[1]?", "+h(p[1]):""}. Publiek domein, <a href="${filePage(p[0])}">Wikimedia Commons</a>.`:""}</figcaption></figure>
   </section>
   <section class="card"><h3>In de fles</h3>
     ${g.geur?`<div class="field"><div class="row between"><strong>Geurigheid</strong><span class="small muted">${h(words(g.geur))}</span></div>${scale(LV,lvR(g.geur))}</div>`:""}
@@ -762,7 +765,7 @@ function vGrape(g){
   <section class="card"><h3>In de kelder</h3><ul class="list">${g.k.map(w=>`<li>${h(w)}</li>`).join("")}</ul></section>
   ${cellar.length?(()=>{const W=winesOf(g);return `<section class="card"><h3>Jouw wijnen met deze druif</h3>${W.length?W.slice(0,6).map(wineRow).join("")+(W.length>6?`<p class="small muted">En nog ${W.length-6} meer in Mijn Wijnboek.</p>`:""):`<p class="small muted">Nog geen wijn van deze druif in Mijn Wijnboek.</p>`}</section>`})():""}
   <section class="card tasting"><h3>Zelf proeven</h3><p>${h(g.proef)}</p><p class="small muted">Twee wijnen naast elkaar: wat is hetzelfde, wat verschilt?</p></section>
-  <p class="src">Inhoud: boek p. ${g.p}. Aroma's licht gelijkgetrokken.${p?"":" Voor deze druif is geen plaat uit 1901-1910 gevonden, daarom een getekende tros."}</p>`;
+  <p class="src">Inhoud: boek p. ${g.p}. Aroma's licht gelijkgetrokken.${p?"":" Voor deze druif is geen oude botanische plaat gevonden, daarom een getekende tros."}</p>`;
 }
 function setCheck(sel,ok){const hit=sel.filter(s=>ok.includes(s)).length;return hit===ok.length&&sel.length===ok.length?"ok":hit?"half":"no"}
 function checkBuild(){
