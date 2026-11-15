@@ -860,7 +860,6 @@ function vStart(){
   const weak=[...new Set(Object.entries(store.miss).sort((a,b)=>b[1]-a[1]).slice(0,6).map(e=>e[0].split(":")[1]))];
   const st=streak(),nu=store.days[today()]||0,GOAL=20,tot=Object.values(store.stats).reduce((a,x)=>a+x.t,0);
   const week=[...Array(7)].map((_,i)=>{const d=new Date();d.setDate(d.getDate()-6+i);return `<span><i class="${store.days[dkey(d)]?"on":""}"></i>${["zo","ma","di","wo","do","vr","za"][d.getDay()]}</span>`}).join("");
-  let left="";if(store.exam){const n=Math.ceil((new Date(store.exam+"T00:00:00")-new Date(today()+"T00:00:00"))/864e5);left=n>1?`Nog ${n} dagen tot je examen.`:n===1?"Morgen is je examen. Succes!":n===0?"Vandaag is je examen. Succes!":"Je examendatum is voorbij."}
   const g=G[hashN(today())%G.length];
   const medals=[["Eerste ronde",tot>=10],["100 vragen",tot>=100],["500 vragen",tot>=500],["7 dagen op rij",(store.best||0)>=7],["Alle druiven opgebouwd",built.length>=G.length],["Proeflijst compleet",nt>=26],["Oefenexamen gehaald",store.examPass>0]];
   return `<div class="hub">${tiles.map(t=>`<button class="tile" data-act="go" data-tab="${t[0]}"><strong>${t[1]}</strong><span>${t[2]}</span></button>`).join("")}</div>
@@ -868,7 +867,6 @@ function vStart(){
     <div class="stat"><div class="row between"><span>${nu} ${nu===1?"vraag":"vragen"} vandaag</span><strong>${nu>=GOAL?"Dagdoel gehaald":"doel: "+GOAL}</strong></div><div class="bar"><i style="width:${Math.min(100,Math.round(100*nu/GOAL))}%"></i></div></div>
     <div class="week">${week}</div>
     ${store.wrong.length?`<button class="btn ghost wide" data-act="q-wrong">Oefen je fouten (${Math.min(20,store.wrong.length)})</button>`:""}
-    <label class="row between small"><span>${left||"Wanneer is je examen?"}</span><input type="date" id="examdate" value="${h(store.exam||"")}" aria-label="Examendatum"></label>
   </section>
   <section class="card"><h2>Zoeken</h2><input type="search" id="zoek" value="${h(zoek)}" placeholder="Druif, gebied of term" aria-label="Zoek een druif, gebied of term"><div id="zoekres">${hitsHTML(zoek)}</div></section>
   <section class="card"><h3>Druif van de dag</h3><div class="dag">${plate(g,120)}<div><h2><i class="swatch ${g.c}"></i>${h(g.n)}</h2><p class="small muted">${h(g.ar.slice(0,4).join(", "))}</p><button class="chip" data-act="s-grape" data-n="${h(g.n)}">Bekijk</button></div></div></section>
@@ -1502,7 +1500,6 @@ view.addEventListener("click",e=>{
   render();if(scroll)top();
 });
 view.addEventListener("input",e=>{if(e.target.id==="zoek"){zoek=e.target.value;const r=document.getElementById("zoekres");if(r)r.innerHTML=hitsHTML(zoek)}});
-view.addEventListener("change",e=>{if(e.target.id==="examdate"){store.exam=e.target.value||"";save();render()}});
 // Klok van het oefenexamen: alleen het klokje bijwerken; is de tijd om, dan stopt het examen.
 setInterval(()=>{if(!quiz||!quiz.exam||quiz.done)return;const left=quiz.end-Date.now();if(left<=0){quiz.timeup=true;finishExam();if(tab==="overhoren"){render();top()}}else{const c=document.getElementById("clock");if(c)c.textContent=clock(left)}},1000);
 load();applyTheme();loadCellar();
