@@ -109,7 +109,7 @@ input[type=search]{width:100%}input:focus-visible,textarea:focus-visible{outline
 .grape em{display:block;font-style:normal;font-size:.75rem;color:var(--muted);font-variant-numeric:tabular-nums}
 .grape.w{border-left:5px solid var(--gold)} .grape.b{border-left:5px solid var(--rose)}
 .plate{position:relative;display:block;background:var(--paper);overflow:hidden;border-radius:10px}
-.plate svg.drawn{display:block;width:100%;height:100%;padding:6%}
+.plate svg.drawn{display:block;width:100%;height:100%}
 .plate img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0}
 .plate.loaded img{opacity:1}.plate.loaded svg.drawn{visibility:hidden}
 @media (prefers-reduced-motion:no-preference){.plate img{transition:opacity .4s}}
@@ -706,16 +706,78 @@ const altUrl=(f,w)=>"https://commons.wikimedia.org/wiki/Special:FilePath/"+encod
 const fileUrl=(f,w)=>{const n=f.replace(/ /g,"_"),m=MD5[f],e=encodeURIComponent(n);return m?`https://upload.wikimedia.org/wikipedia/commons/thumb/${m[0]}/${m.slice(0,2)}/${e}/${w}px-${e}`:"https://commons.wikimedia.org/wiki/Special:FilePath/"+e+"?width="+w};
 const filePage=f=>"https://commons.wikimedia.org/wiki/File:"+encodeURIComponent(f.replace(/ /g,"_"));
 function hashN(s){let x=0;for(const c of s)x=(x*31+c.charCodeAt(0))>>>0;return x}
-// Getekende tros als de plaat ontbreekt of niet laadt.
+// Getekende botanische plaat (in de stijl van de oude platen) voor druiven zonder plaat, en als terugval tijdens het laden.
+// Vorm van tros en blad per druif bij benadering, gebaseerd op algemene ampelografische beschrijvingen; geen determinatiekenmerk.
+// tros: L lengte (0-1), W breedte, f vorm (con = kegel, cyl = cilinder), wing vleugel, r besgrootte, sp losheid (1 = los), bloom waas
+// blad: lob 5 of 3, d diepte insnijdingen (0-1); kl kleur van de bes: [licht, basis, donker]
+const LOOK={
+  "Albariño":{L:.5,W:62,f:"con",wing:.6,r:6,sp:.86,lob:5,d:.38,kl:["#f2efc0","#c3cd73","#7f8c3a"]},
+  "Grüner veltliner":{L:.78,W:66,f:"cyl",wing:.8,r:6.4,sp:.9,lob:5,d:.46,kl:["#eef0c4","#b9c66e","#78873a"]},
+  "Torrontés":{L:.82,W:78,f:"con",wing:.5,r:8,sp:1.06,lob:5,d:.52,kl:["#f7edbe","#d6c46c","#93803a"]},
+  "Verdejo":{L:.52,W:58,f:"cyl",wing:0,r:6,sp:.84,lob:3,d:.26,kl:["#f0efbf","#bcc765","#7a8636"]},
+  "Verdicchio":{L:.78,W:66,f:"cyl",wing:.9,r:7,sp:.9,lob:5,d:.32,kl:["#f3eec0","#c8c86c","#8b8a3a"]},
+  "Montepulciano":{L:.74,W:70,f:"con",wing:.4,r:7,sp:.86,lob:3,d:.2,kl:["#7d6c9c","#3b2a50","#1d1329"],bloom:.2},
+  "Nebbiolo":{L:.9,W:64,f:"con",wing:1,r:6,sp:.9,lob:3,d:.3,kl:["#8e5f86","#4e2546","#26111f"],bloom:.28},
+  "Primitivo":{L:.64,W:62,f:"cyl",wing:.3,r:7,sp:.84,lob:3,d:.18,kl:["#7c6696","#3a2950","#1c1229"],bloom:.18,mix:1},
+  "Pinotage":{L:.54,W:58,f:"con",wing:.2,r:6.2,sp:.84,lob:5,d:.3,kl:["#76638f","#35264a","#1a1126"],bloom:.2},
+  "Zweigelt":{L:.84,W:72,f:"con",wing:.6,r:7.4,sp:1,lob:5,d:.42,kl:["#7a6a9c","#382a52","#1b1228"],bloom:.22}
+};
+let plateN=0;
 function cluster(g){
-  const r=hashN(g.n),rows=[[4,5,5,4,3,2,1],[3,4,5,5,4,3,2,1],[4,5,4,4,3,2,1],[5,5,4,3,2,1]][r%4];
-  const fill=g.c==="w"?["#c8cf6f","#a9b54a","#e4e7a2"]:["#5a3463","#3e2148","#8a5f93"];
-  let b="";const y0=58;
-  rows.forEach((n,i)=>{for(let j=0;j<n;j++){const x=60+(j-(n-1)/2)*15+((i%2)?2:-2),y=y0+i*12.5,k=(i+j+r)%3;
-    b+=`<circle cx="${x.toFixed(1)}" cy="${y}" r="8.2" fill="${fill[k===2?0:k]}" stroke="${fill[1]}" stroke-width="1"/><circle cx="${(x-2.6).toFixed(1)}" cy="${y-2.8}" r="2" fill="#fff" opacity=".45"/>`}});
-  return `<svg class="drawn" viewBox="0 0 120 160" aria-hidden="true"><path d="M60 12 C61 26 60 38 60 50" stroke="#6b5a3a" stroke-width="3" fill="none" stroke-linecap="round"/>
-    <path d="M62 24 C78 8 104 10 110 26 C100 24 98 34 106 40 C92 42 90 34 84 44 C80 36 70 38 62 24Z" fill="#7e9a3c" stroke="#5c7428" stroke-width="1.2"/>
-    <path d="M62 24 L96 30" stroke="#5c7428" stroke-width="1"/>${b}</svg>`;
+  const seed=hashN(g.n);let s=seed||1;const rnd=()=>(s=(s*1103515245+12345)>>>0,s/4294967296);
+  const def=g.c==="w"?{kl:["#eef0c4","#bfc96e","#7d8a3a"]}:{kl:["#7a6a9a","#3b2a4f","#1d1328"],bloom:.2};
+  const o=Object.assign({L:.6+(seed%30)/100,W:64,f:seed%2?"con":"cyl",wing:(seed%5)/6,r:6.6,sp:.9,lob:seed%3?5:3,d:.3+(seed%4)/12},def,LOOK[g.n]||{});
+  const id="pl"+(++plateN),F=n=>n.toFixed(1),Pi=Math.PI;
+  // papier, rank en vlekjes
+  let svg=`<svg class="drawn" viewBox="0 0 200 300" aria-hidden="true"><defs>
+    <radialGradient id="${id}p" cx=".5" cy=".45" r=".75"><stop offset="0" stop-color="#f6efdc"/><stop offset=".75" stop-color="#ede2c6"/><stop offset="1" stop-color="#dccdaa"/></radialGradient>
+    <linearGradient id="${id}l" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9db25f"/><stop offset=".6" stop-color="#6f8a37"/><stop offset="1" stop-color="#55702a"/></linearGradient>
+    ${[0,1].map(v=>`<radialGradient id="${id}b${v}" cx=".34" cy=".3" r=".78"><stop offset="0" stop-color="${o.kl[0]}"/><stop offset="${v?.5:.62}" stop-color="${o.kl[1]}"/><stop offset="1" stop-color="${o.kl[2]}"/></radialGradient>`).join("")}
+    <radialGradient id="${id}m" cx=".34" cy=".3" r=".78"><stop offset="0" stop-color="#d98a92"/><stop offset=".55" stop-color="#8e3b4c"/><stop offset="1" stop-color="#4a1a27"/></radialGradient>
+    <radialGradient id="${id}g" cx=".34" cy=".3" r=".78"><stop offset="0" stop-color="#e6d9a8"/><stop offset=".55" stop-color="#b98f6a"/><stop offset="1" stop-color="#6e4a35"/></radialGradient>
+  </defs><rect width="200" height="300" fill="url(#${id}p)"/>`;
+  for(let i=0;i<7;i++)svg+=`<circle cx="${F(10+rnd()*180)}" cy="${F(10+rnd()*280)}" r="${F(.6+rnd()*1.6)}" fill="#a0855a" opacity=".12"/>`;
+  // rank met knopen
+  svg+=`<path d="M6 58 C48 40 118 50 194 32" stroke="#6e5234" stroke-width="5.5" fill="none" stroke-linecap="round"/><path d="M8 56 C50 39 118 48 192 31" stroke="#a6815a" stroke-width="1.4" fill="none" opacity=".7"/>
+    <ellipse cx="76" cy="46.5" rx="4.2" ry="5" fill="#6e5234"/><ellipse cx="140" cy="41" rx="4" ry="4.8" fill="#6e5234"/>`;
+  // rank: krulletje
+  svg+=`<path d="M40 50 C33 64 18 64 21 75 C24 85 37 81 34 73 C32 67 26 69 27 73" stroke="#7d8d45" stroke-width="1.5" fill="none" stroke-linecap="round"/>`;
+  // blad: handvormig, lobben via poolcoördinaten, gezaagde rand
+  const cx=130,cy=100,R=60,a0=Pi*0.3,P=(a,r)=>[cx+Math.cos(a0+a)*r,cy+Math.sin(a0+a)*r];
+  const tips=o.lob===5?[[-2.45,.62],[-1.22,.92],[0,1],[1.22,.92],[2.45,.62]]:[[-2.4,.66],[-1.15,.9],[0,1],[1.15,.9],[2.4,.66]];
+  const dep=i=>o.lob===5?o.d:(i===0||i===3?o.d*.35:o.d);
+  const key=[[-Pi+.18,.16]];
+  tips.forEach((t,i)=>{key.push(t);if(i<4){const n=tips[i+1];key.push([(t[0]+n[0])/2,((t[1]+n[1])/2)*(1-dep(i))])}});
+  key.push([Pi-.18,.16]);
+  let pts=[];
+  for(let i=0;i<key.length-1;i++){const [a1,r1]=key[i],[a2,r2]=key[i+1],m=Math.max(2,Math.round(Math.abs(r2-r1)*R/7+Math.abs(a2-a1)*4));
+    for(let k=0;k<m;k++){const u=k/m,a=a1+(a2-a1)*u,r=(r1+(r2-r1)*u)*R*(1+.06*Math.sin(u*Pi));pts.push(P(a,r));
+      const ut=(k+.55)/m,at=a1+(a2-a1)*ut,rt=(r1+(r2-r1)*ut)*R*(1+.06*Math.sin(ut*Pi))+2.6+rnd()*1.2;pts.push(P(at,rt))}}
+  pts.push(P(key[key.length-1][0],key[key.length-1][1]*R));
+  svg+=`<path d="M138 42 Q142 58 ${F(P(Pi,.1*R)[0])} ${F(P(Pi,.1*R)[1])}" stroke="#7a8a3e" stroke-width="2.2" fill="none"/>`;
+  svg+=`<path d="M${pts.map(p=>F(p[0])+" "+F(p[1])).join("L")}Z" fill="url(#${id}l)" stroke="#4d6324" stroke-width=".9" stroke-linejoin="round"/>`;
+  tips.forEach(t=>{const [x,y]=P(t[0],t[1]*R*.92),[mx,my]=P(t[0]*.92,t[1]*R*.5);svg+=`<path d="M${cx} ${cy} Q${F(mx)} ${F(my)} ${F(x)} ${F(y)}" stroke="#d3dba3" stroke-width="1" fill="none" opacity=".75"/>`;
+    for(const q of [.38,.62]){const [bx,by]=P(t[0]*.97,t[1]*R*q);for(const sd of [-1,1]){const [ex,ey]=P(t[0]+sd*.32,t[1]*R*(q+.22));svg+=`<path d="M${F(bx)} ${F(by)} L${F(ex)} ${F(ey)}" stroke="#d3dba3" stroke-width=".55" opacity=".6"/>`}}});
+  // tros: steel en spil, daarna bessen (achterste laag donkerder voor diepte)
+  const top=80,len=70+o.L*125,x0=78,cxT=t=>x0+6*Math.sin(t*2.6+(seed%7));
+  const W=o.W*1.45,wid=t=>{const sh=Math.pow(Math.sin(Pi/2*Math.min(1,(t+.03)/.32)),.85);return W*sh*(o.f==="con"?Math.pow(1-t,.75):1-Math.pow(t,2.2)*.85)};
+  svg+=`<path d="M78 50 C76 60 82 68 ${F(cxT(0))} ${top}" stroke="#6f7d3a" stroke-width="2.6" fill="none" stroke-linecap="round"/><path d="M${F(cxT(0))} ${top} ${[.2,.4,.6,.8,.92].map(t=>"L"+F(cxT(t))+" "+F(top+t*len)).join(" ")}" stroke="#6f7d3a" stroke-width="1.6" fill="none"/>`;
+  const R0=o.r,dy=R0*1.32*o.sp,dx=R0*1.7*o.sp,berries=[];
+  const fillRow=(yy,w,xc,back)=>{const n=Math.max(1,Math.round(w/dx));for(let j=0;j<n;j++){const x=xc+(j-(n-1)/2)*dx+(back?dx/2:0)+(rnd()-.5)*R0*.7,y=yy+(back?dy/2:0)+(rnd()-.5)*R0*.6;
+    if(back&&j===n-1)continue;berries.push([x,y,R0*(back?.92:.86+rnd()*.26),back])}};
+  for(let y=top+R0*.6,i=0;y<top+len;y+=dy,i++){const t=(y-top)/len,w=wid(t),xc=cxT(t);if(o.sp<.95||i%2)fillRow(y,w*.86,xc,true);fillRow(y,w,xc,false)}
+  if(o.wing){const wl=len*.3*o.wing,wx=cxT(.05)-W*.5,wy=top+R0*1.4;
+    svg+=`<path d="M${F(cxT(.04))} ${F(top+R0*.8)} Q${F(wx+10)} ${F(wy-4)} ${F(wx)} ${F(wy+R0)}" stroke="#6f7d3a" stroke-width="1.3" fill="none"/>`;
+    for(let y=wy,k=0;y<wy+wl;y+=dy,k++){const t=(y-wy)/wl;fillRow(y,W*.3*Math.sqrt(Math.min(1,(t+.15)/.35))*(1-t*.8),wx-t*5,false)}}
+  berries.sort((a,b)=>a[3]===b[3]?a[1]-b[1]:a[3]?-1:1);
+  for(const [x,y,r,back] of berries){
+    let gr=`url(#${id}b${rnd()<.5?0:1})`;if(o.mix){const q=rnd();if(q<.12)gr=`url(#${id}m)`;else if(q<.16)gr=`url(#${id}g)`}
+    svg+=`<circle cx="${F(x)}" cy="${F(y)}" r="${F(r)}" fill="${gr}" stroke="${o.kl[2]}" stroke-width=".7"${back?' opacity=".8"':""}/>`;
+    if(o.bloom&&!back)svg+=`<circle cx="${F(x)}" cy="${F(y)}" r="${F(r)}" fill="#a9b3cc" opacity="${o.bloom}"/>`;
+    if(!back)svg+=`<ellipse cx="${F(x-r*.36)}" cy="${F(y-r*.38)}" rx="${F(r*.26)}" ry="${F(r*.18)}" fill="#fff" opacity="${o.bloom?.35:.55}" transform="rotate(-30 ${F(x-r*.36)} ${F(y-r*.38)})"/>`}
+  // onderschrift zoals op de oude platen
+  svg+=`<text x="100" y="291" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-style="italic" font-size="13" fill="#5b4a30">${h(g.n)}</text></svg>`;
+  return svg;
 }
 function plate(g,w){
   const p=PLATES[g.n];
