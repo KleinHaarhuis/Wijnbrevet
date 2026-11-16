@@ -1474,6 +1474,9 @@ function section(id){
     <text x="6" y="174" class="on">west</text></svg>`,
     "De wijngaarden liggen in een strook van zo'n 80 km aan de voet van het Pfälzerwald. Dat houdt koude luchtstromen tegen, waardoor het hier zo mild is dat er amandel- en vijgenbomen groeien."];
 }
+// Bij welk gebied hoort welke doorsnede? Een deelgebied valt terug op zijn hoofdgebied.
+const SECFOR={mosel:["Mosel"],rheingau:["Rheingau"],pfalz:["Pfalz"],wachau:["Wachau"],neusiedl:["Neusiedlersee","Burgenland"],valais:["Valais"],vogezen:["Alsace"],cotedor:["Côte de Nuits","Côte de Beaune","Bourgogne"]};
+function secOf(D,r){for(let x=r;x;x=x.parent&&all(D).find(y=>y.n===x.parent)){const k=Object.keys(SECFOR).find(k=>SECFOR[k].includes(x.n)&&D.sections.some(s=>s[0]===k));if(k)return k}return null}
 function vGeo(){
   const D=GEO[geo.land],q=geo.quiz,r=geo.sel&&all(D).find(x=>x.n===geo.sel),n=q?q.order.length:all(D).length,hasKids=r&&all(D).some(x=>x.parent===r.n);
   const note=geo.noTiles?"De reliëfkaart laadt hier niet. Op GitHub verschijnt hij onder de gebieden.":geo.credit?TILE[geo.prov].credit:"Reliëf laden…";
@@ -1488,9 +1491,12 @@ function vGeo(){
     return `<div class="row"><button class="chip" data-act="g-mine" aria-pressed="${geo.mine!==false}">Mijn wijnen (${n})</button></div>${w?`<section class="card"><h3>Uit Mijn Wijnboek${w.list==="proberen"?" · wil ik proberen":""}</h3>${wineRow(w)}${w.dr.length?`<p class="small"><span class="muted">Druiven:</span> ${h(w.dr.join(", "))}</p>`:""}</section>`:""}`})()}
   <div class="row"><button class="chip" data-act="g-explore" aria-pressed="${!q}">Verkennen</button><button class="chip" data-act="g-quiz" aria-pressed="${!!q}">${q&&q.i>=n?"Opnieuw overhoren":q&&q.root?"Overhoor me: "+h(q.root):!q&&hasKids?"Overhoor me: "+h(r.n):"Overhoor me"}</button></div>
   ${q?"":`${r?`<section class="card"><div class="row between"><h2>${h(r.n)}</h2><button class="chip" data-act="g-zoom">Zoom in</button></div><dl>${r.parent?`<dt>Ligt in</dt><dd>${h(r.parent)}</dd>`:""}${r.druif?`<dt>Druiven</dt><dd>${h(r.druif)}</dd>`:""}${r.kleur?`<dt>Aandeel</dt><dd>${h(r.kleur)}</dd>`:""}${r.stijl?`<dt>Wijn</dt><dd>${h(r.stijl)}</dd>`:""}${r.ha?`<dt>Wijngaard</dt><dd>${h(r.ha)}</dd>`:""}</dl><p>${h(r.info)}</p></section>`:`<p class="muted small">Tik op een gebied voor uitleg.</p>`}
-  <section class="card"><h3>Wat bepaalt het klimaat?</h3><div class="row">${Object.entries(D.layers).map(([k,l])=>`<button class="chip" data-act="g-layer" data-id="${k}" aria-pressed="${geo.layer===k}">${l[0]}</button>`).join("")}</div>
+  ${r&&(r.klimaat||r.bodem)?`<section class="card"><h3>Klimaat en bodem: ${h(r.n)}</h3><dl>${r.klimaat?`<dt>Klimaat</dt><dd>${h(r.klimaat)}</dd>`:""}${r.bodem?`<dt>Bodem</dt><dd>${h(r.bodem)}</dd>`:""}</dl></section>`:""}
+  <section class="card"><h3>Wat bepaalt het klimaat in ${h(D.title)}?</h3><div class="row">${Object.entries(D.layers).map(([k,l])=>`<button class="chip" data-act="g-layer" data-id="${k}" aria-pressed="${geo.layer===k}">${l[0]}</button>`).join("")}</div>
     ${geo.layer?`<p class="note">${h(D.layers[geo.layer][1])}</p>`:""}</section>
-  <section class="card"><h3>Doorsneden</h3><div class="row">${D.sections.map(x=>`<button class="chip" data-act="g-sec" data-id="${x[0]}" aria-pressed="${geo.sec===x[0]}">${x[1]}</button>`).join("")}</div>${sec[0]}<p class="small">${h(sec[1])}</p></section>
+  ${(()=>{const own=r&&secOf(D,r),id=(!geo.secPick&&own)||(D.sections.some(x=>x[0]===geo.sec)?geo.sec:D.sections[0][0]),S=section(id),nm=D.sections.find(x=>x[0]===id)[1];
+    return `<section class="card"><h3>${own&&id===own?"Doorsnede bij "+h(r.n):"Doorsneden"}</h3>${r&&!own?`<p class="small muted">Van ${h(r.n)} is (nog) geen doorsnede. Wel van:</p>`:""}
+    <div class="row">${D.sections.map(x=>`<button class="chip" data-act="g-sec" data-id="${x[0]}" aria-pressed="${id===x[0]}">${x[1]}</button>`).join("")}</div>${S[0]}<p class="small">${h(S[1])}</p></section>`})()}
   <p class="src">${h(D.src)}</p>`}`;
 }
 function hookTiles(){
@@ -1551,7 +1557,7 @@ view.addEventListener("click",e=>{
   else if(a==="flag-grape"){if(!build.flagged){store.flags.push({q:"Druivenprofiel "+build.g.n,a:"het profiel zoals de app het toont",src:"Boek p. "+build.g.p});save();build.flagged=true;copied=false}}
   else if(a==="copyflags"){try{navigator.clipboard.writeText(flagText()).then(()=>{copied=true;render()}).catch(()=>{const t=document.getElementById("flags");if(t)t.select()})}catch(e){const t=document.getElementById("flags");if(t)t.select()}return}
   else if(a==="clearflags"){store.flags=[];save();copied=false}
-  else if(a==="g-region"){if(Date.now()-geo.lastMove<450)return;const q=geo.quiz;if(q&&q.i<q.order.length){const ok=d.n===q.order[q.i];if(ok){record({code:"4.3",key:"kaart:"+d.n},q.first);if(q.first)q.good++;q.i++;q.wrong=null;q.first=true}else{q.wrong=d.n;q.first=false}}else if(!q)geo.sel=d.n}
+  else if(a==="g-region"){if(Date.now()-geo.lastMove<450)return;const q=geo.quiz;if(q&&q.i<q.order.length){const ok=d.n===q.order[q.i];if(ok){record({code:"4.3",key:"kaart:"+d.n},q.first);if(q.first)q.good++;q.i++;q.wrong=null;q.first=true}else{q.wrong=d.n;q.first=false}}else if(!q){geo.sel=d.n;geo.secPick=false}}
   else if(a==="g-layer")geo.layer=geo.layer===d.id?null:d.id;
   else if(a==="g-quiz"){const D=GEO[geo.land],A=all(D),kids=n=>A.filter(x=>x.parent===n).flatMap(x=>[x].concat(kids(x.n))),selN=geo.sel||(geo.quiz&&geo.quiz.root),sub=selN?kids(selN):[],root=sub.length?A.find(x=>x.n===selN):null;
     const pool=root?sub:D.quizTop?D.regions:A;geo.quiz={order:shuffle(pool.map(r=>r.n)),i:0,wrong:null,first:true,good:0,root:root&&root.n};
@@ -1566,7 +1572,7 @@ view.addEventListener("click",e=>{
   else if(a==="g-grape"){if(Date.now()-geo.lastMove<450)return;tab="opbouwen";build=null;gview=d.n;try{location.hash=tab}catch(e){}scroll=true}
   else if(a==="g-plus"){zoomBy(2);return}
   else if(a==="g-minus"){zoomBy(.5);return}
-  else if(a==="g-sec")geo.sec=d.id;
+  else if(a==="g-sec"){geo.sec=d.id;geo.secPick=true}
   else if(a==="reset")confirmReset=true;
   else if(a==="reset-no")confirmReset=false;
   else if(a==="reset-yes"){const t=store.theme;store=fresh();store.theme=t;save();confirmReset=false;bkMsg=""}
