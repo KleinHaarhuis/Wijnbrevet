@@ -191,6 +191,7 @@ textarea{width:100%;min-height:110px;font:inherit;font-size:.82rem;color:var(--i
 .sec text{font-family:var(--body);font-size:11px;font-weight:600;fill:var(--ink)} .sec text.on{fill:var(--bg)}
 @media (prefers-reduced-motion:no-preference){.bar i{transition:width .3s}}
 .webinfo dl{grid-template-columns:1fr;gap:2px}.webinfo dd{margin:0 0 6px}.webinfo{margin-top:.8rem;padding:.6rem .8rem;border-left:3px solid var(--accent);background:rgba(107,143,113,.08);border-radius:6px}
+.clim{width:100%;height:auto;display:block;margin:.4rem 0}.clim .cg{stroke:var(--line,rgba(0,0,0,.12));stroke-width:.6}.clim text{font-size:9px;fill:var(--muted)}.clim .cb{fill:var(--water,#4f8c88);opacity:.75}.clim .cb2{fill:var(--gold,#b3913f);opacity:.75}.clim polyline.cl{fill:none;stroke:var(--rose,#a8687b);stroke-width:2}.clim circle.cl{fill:var(--rose,#a8687b)}.clim polyline.cl2{fill:none;stroke:var(--accent);stroke-width:2;stroke-dasharray:4 3}.clim circle.cl2{fill:var(--accent)}.key{display:inline-block;width:10px;height:10px;border-radius:2px;margin:0 3px 0 6px;vertical-align:-1px}.key.kl{background:var(--rose,#a8687b)}.key.kb{background:var(--water,#4f8c88)}.key.kl2{background:var(--accent)}.key.kb2{background:var(--gold,#b3913f)}#climcmp{margin-left:6px}
 </style>
 </head>
 <body>
@@ -1628,6 +1629,49 @@ const WEB={
 "Ticino":{k:"Enige Zwitserse wijnstreek op de zuidkant van de Alpen: veel regen en veel zon. Sottoceneri (zuid) warmer en mediterraan, Sopraceneri (noord) koeler door de Alpen. Bijna 80% merlot.",b:"Sopraceneri (ca. 300 ha): vooral graniet en leisteen op steile terrassen; Sottoceneri (ca. 600 ha): klei en kalk op zacht glooiende percelen.",s:SWP},
 "Entre-Deux-Mers":{k:"Tussen Garonne en Dordogne, onder invloed van de Atlantische Oceaan.",b:"Vooral klei en klei-kalk met wisselende hoeveelheden grind, vooral op de hellingen, op een ondergrond van klei-kalk.",s:CIVB}
 };
+// Klimaatnormalen 1991–2020 per weerstation (via Wikipedia; bron per station). [naam, bron, gem. temp °C per maand, neerslag mm per maand]
+const CLIM={
+reims:["Reims","Météo Climat",[3.5,4.2,7.2,10.0,13.7,16.8,19.2,18.8,15.3,11.6,6.9,4.2],[47.2,41.4,43.1,39.8,56.9,55.6,59.7,56.4,44.8,48.2,49.7,59.4]],
+colmar:["Colmar","Meteociel",[2.4,3.5,7.2,11.1,15.2,18.8,20.6,20.3,16.1,11.5,6.2,3.2],[33.1,30.6,34.0,42.8,69.8,66.2,62.8,60.8,51.3,56.8,43.6,43.2]],
+auxerre:["Auxerre","Météo Climat",[4.0,4.9,8.2,11.1,14.8,18.2,20.5,20.4,16.4,12.6,7.6,4.7],[52.1,47.8,48.0,56.9,65.5,54.0,51.3,60.1,55.9,71.4,62.1,60.3]],
+dijon:["Dijon","Meteociel",[2.7,3.8,7.5,10.7,14.6,18.5,20.8,20.4,16.4,11.8,6.5,3.4],[56.8,42.9,48.2,57.5,76.1,65.8,64.9,62.0,56.4,73.6,77.6,61.6]],
+macon:["Mâcon","Meteociel",[3.5,4.6,8.5,11.7,15.7,19.5,21.5,21.1,17.0,12.7,7.4,4.1],[58.1,48.9,49.1,65.5,75.7,69.8,72.2,72.6,71.1,91.1,92.8,66.8]],
+lyon:["Lyon","Meteociel",[4.1,5.2,9.0,12.3,16.3,20.3,22.6,22.3,17.9,13.7,8.1,4.8],[49.8,41.6,49.4,68.9,80.9,74.1,67.4,65.5,82.5,99.8,87.2,53.7]],
+orange:["Orange","Meteociel",[6.2,7.2,10.8,13.6,17.7,21.9,24.5,24.2,19.7,15.4,10.1,6.7],[54.8,36.6,44.5,63.0,60.1,37.4,38.4,40.2,105.3,94.5,96.6,48.2]],
+toulon:["Toulon","Météo-France",[9.9,10.1,12.4,14.7,18.3,22.2,24.7,25.0,21.5,17.8,13.5,10.7],[70.5,46.8,39.0,55.4,40.2,27.0,6.2,13.4,69.9,105.8,93.4,65.8]],
+bastia:["Bastia","Météo-France",[9.6,9.5,11.3,13.7,17.5,21.4,24.4,24.8,21.4,17.7,13.6,10.6],[67.3,63.5,63.7,71.6,53.7,38.8,13.8,21.1,74.5,126.5,134.3,88.1]],
+perpignan:["Perpignan","Météo-France",[8.7,9.2,12.0,14.2,17.8,22.0,24.6,24.5,20.9,17.0,12.3,9.3],[60.1,40.9,51.6,66.1,45.6,23.6,15.1,22.7,43.0,82.1,72.6,54.9]],
+bordeaux:["Bordeaux-Mérignac","Météo-France",[7.1,7.8,10.7,13.0,16.6,19.8,21.7,21.9,18.8,15.2,10.4,7.7],[86.9,66.9,63.3,75.6,71.1,70.4,48.6,56.7,81.2,83.3,114.5,106.4]],
+bergerac:["Bergerac","Meteociel",[5.9,6.5,9.7,12.1,15.8,19.3,21.1,21.1,17.6,14.2,9.2,6.3],[67.0,53.2,53.7,76.1,77.4,63.2,57.0,61.5,66.2,65.2,76.2,76.2]],
+pau:["Pau","Météo-France",[6.8,7.4,10.3,12.5,16.0,19.1,20.9,21.1,18.3,15.0,10.0,7.5],[101.8,82.8,85.7,106.4,104.2,85.7,64.1,64.7,76.8,91.5,132.0,98.1]],
+nantes:["Nantes","Météo-France",[6.4,6.7,9.2,11.4,14.7,17.8,19.7,19.8,17.1,13.5,9.4,6.7],[87.9,67.5,58.4,58.3,61.0,48.5,44.2,50.3,59.5,88.8,94.1,101.0]],
+tours:["Tours","Meteociel",[5.1,5.6,8.6,11.0,14.5,18.0,20.2,20.2,16.8,13.0,8.3,5.5],[63.0,52.4,48.7,53.0,57.7,53.2,46.6,44.0,51.8,66.0,69.3,72.1]],
+chambery:["Chambéry","Météo-France",[2.9,4.1,8.0,11.4,15.6,19.4,21.4,20.9,16.8,12.3,6.9,3.4],[102.6,79.1,93.1,87.9,101.0,94.5,91.7,97.6,104.3,113.3,114.6,124.2]],
+trier:["Trier","WMO / Wetterdienst.de",[2.0,2.8,6.2,10.0,13.9,17.1,19.1,18.6,14.5,10.3,5.8,2.8],[63.5,53.0,51.3,44.2,66.7,66.0,72.4,62.0,60.4,65.4,62.2,77.6]],
+geisenheim:["Geisenheim","WMO",[2.5,3.3,6.8,11.0,14.9,18.2,20.2,19.6,15.3,10.6,6.2,3.3],[39.3,34.0,36.2,30.7,49.8,47.5,57.7,48.3,43.0,45.2,43.1,50.4]],
+wurzburg:["Würzburg","WMO",[1.2,2.0,5.8,10.3,14.4,17.8,19.7,19.3,14.8,9.9,5.0,2.0],[40.0,35.8,40.2,32.7,57.3,52.9,65.8,56.3,47.2,47.6,46.2,51.5]],
+freiburg:["Freiburg","DWD",[2.9,4.6,7.6,11.2,15.3,19.2,20.8,20.5,16.4,12.3,6.8,3.9],[48.6,49.1,54.3,65.9,103.4,87.5,92.2,83.3,76.3,79.9,70.4,66.9]],
+wien:["Wenen","GeoSphere Austria",[2.1,3.8,7.7,13.0,17.3,21.0,23.0,22.8,17.7,12.3,7.2,2.8],[37.6,33.5,46.3,39.6,78.3,82.0,80.3,73.8,67.3,47.7,42.9,39.9]],
+graz:["Graz","GeoSphere Austria",[0.6,2.7,6.8,11.6,15.8,19.4,21.2,20.8,16.1,11.3,6.0,1.1],[19.8,28.9,34.6,51.6,93.2,121.3,124.1,128.7,93.8,63.8,54.4,40.0]],
+sion:["Sion","NOAA",[0.5,2.3,7.2,11.3,15.3,19.0,20.6,19.9,15.7,10.7,5.0,0.9],[51.8,40.4,36.9,33.7,52.0,48.2,61.9,59.6,37.6,42.8,50.4,67.7]],
+lugano:["Lugano","NOAA / MeteoSwiss",[3.8,5.0,8.9,12.3,16.3,20.4,22.6,22.1,17.9,13.2,8.4,4.6],[65.5,61.3,75.5,138.0,177.6,171.5,157.9,158.2,164.9,149.7,166.6,79.9]]};
+// Welk station bij welk gebied (deelgebieden erven via parent).
+const CLIMFOR={Champagne:"reims",Alsace:"colmar",Chablis:"auxerre",Bourgogne:"dijon","Mâconnais":"macon",Beaujolais:"macon",Rhône:"lyon","Zuidelijke Rhône":"orange",Provence:"toulon",Corsica:"bastia","Languedoc-Roussillon":"perpignan",Bordeaux:"bordeaux","Sud-Ouest":"bergerac",Madiran:"pau","Jurançon":"pau",Loire:"tours",Muscadet:"nantes",Savoie:"chambery",Mosel:"trier",Rheingau:"geisenheim",Rheinhessen:"geisenheim",Nahe:"geisenheim",Franken:"wurzburg",Baden:"freiburg","Niederösterreich":"wien",Wien:"wien",Burgenland:"wien",Steiermark:"graz",Valais:"sion",Ticino:"lugano"};
+function climOf(D,r){for(let x=r;x;x=x.parent&&all(D).find(y=>y.n===x.parent))if(CLIMFOR[x.n])return CLIMFOR[x.n];return null}
+let climCmp="";
+function climChart(id,cid){const A=CLIM[id],B=cid&&CLIM[cid];if(!A)return "";const W=340,H=170,l=30,r=30,t=12,b=22,w=W-l-r,hh=H-t-b,bw=w/12;
+const pm=Math.max(...A[3],...(B?B[3]:[0]),100),tmin=Math.min(0,...A[2],...(B?B[2]:[0])),tmax=Math.max(25,...A[2],...(B?B[2]:[0]));
+const yP=v=>t+hh-v/pm*hh,yT=v=>t+hh-(v-tmin)/(tmax-tmin)*hh,xm=i=>l+bw*i+bw/2;
+const bars=(P,off,cls)=>P.map((v,i)=>`<rect class="${cls}" x="${(l+bw*i+off).toFixed(1)}" y="${yP(v).toFixed(1)}" width="${(B?bw*.38:bw*.62).toFixed(1)}" height="${(t+hh-yP(v)).toFixed(1)}" rx="1.5"/>`).join("");
+const line=(T,cls)=>`<polyline class="${cls}" points="${T.map((v,i)=>xm(i).toFixed(1)+","+yT(v).toFixed(1)).join(" ")}"/>`+T.map((v,i)=>`<circle class="${cls}" cx="${xm(i).toFixed(1)}" cy="${yT(v).toFixed(1)}" r="2.2"/>`).join("");
+const M="JFMAMJJASOND";
+let g=`<svg class="clim" viewBox="0 0 ${W} ${H}" role="img" aria-label="Klimaatgrafiek ${h(A[0])}">`;
+for(let v=Math.ceil(tmin/10)*10;v<=tmax;v+=10)g+=`<line class="cg" x1="${l}" x2="${W-r}" y1="${yT(v).toFixed(1)}" y2="${yT(v).toFixed(1)}"/><text class="ct" x="${l-4}" y="${(yT(v)+3).toFixed(1)}" text-anchor="end">${v}°</text>`;
+for(let v=0;v<=pm;v+=50)g+=`<text class="cp" x="${W-r+4}" y="${(yP(v)+3).toFixed(1)}">${v}</text>`;
+g+=bars(A[3],B?bw*.1:bw*.19,"cb")+(B?bars(B[3],bw*.52,"cb2"):"")+(B?line(B[2],"cl2"):"")+line(A[2],"cl");
+g+=[...M].map((m,i)=>`<text class="cm" x="${xm(i).toFixed(1)}" y="${H-6}" text-anchor="middle">${m}</text>`).join("")+`<text class="cp" x="${W-r+4}" y="${t-2}">mm</text></svg>`;
+const sum=X=>`${h(X[0])}: gem. ${(X[2].reduce((a,c)=>a+c,0)/12).toFixed(1)} °C, ${Math.round(X[3].reduce((a,c)=>a+c,0))} mm/jaar, warmste maand ${Math.max(...X[2])} °C`;
+return g+`<p class="small"><span class="key kl"></span> temperatuur <span class="key kb"></span> neerslag${B?` · <span class="key kl2"></span><span class="key kb2"></span> ${h(B[0])}`:""}</p><p class="small">${sum(A)}${B?`<br>${sum(B)}`:""}</p>`}
 function klimOf(D,r){for(let x=r;x;x=x.parent&&all(D).find(y=>y.n===x.parent)){const z=splitInfo(x.info,x.n);if(x.klimaat||x.bodem||z.k||z.b)return {from:x,k:x.klimaat||z.k,b:x.bodem||z.b}}return null}
 const SECFOR={mosel:["Mosel"],rheingau:["Rheingau"],pfalz:["Pfalz"],franken:["Franken"],wachau:["Wachau"],neusiedl:["Neusiedlersee","Burgenland"],steiermark:["Steiermark","Südsteiermark"],valais:["Valais"],vogezen:["Alsace"],chablis:["Chablis"],cotedor:["Côte de Nuits","Côte de Beaune","Bourgogne"],champagne:["Champagne"],nrhone:["Noordelijke Rhône","Rhône"],zrhone:["Zuidelijke Rhône"],sauternes:["Sauternes","Barsac","Coteaux du Layon"],medoc:["Médoc","Bordeaux"]};
 function secOf(D,r){for(let x=r;x;x=x.parent&&all(D).find(y=>y.n===x.parent)){const k=Object.keys(SECFOR).find(k=>SECFOR[k].includes(x.n)&&D.sections.some(s=>s[0]===k));if(k)return k}return null}
@@ -1646,6 +1690,7 @@ function vGeo(){
   <div class="row"><button class="chip" data-act="g-explore" aria-pressed="${!q}">Verkennen</button><button class="chip" data-act="g-quiz" aria-pressed="${!!q}">${q&&q.i>=n?"Opnieuw overhoren":q&&q.root?"Overhoor me: "+h(q.root):!q&&hasKids?"Overhoor me: "+h(r.n):"Overhoor me"}</button></div>
   ${q?"":`${r?`<section class="card"><div class="row between"><h2>${h(r.n)}</h2><button class="chip" data-act="g-zoom">Zoom in</button></div><dl>${r.parent?`<dt>Ligt in</dt><dd>${h(r.parent)}</dd>`:""}${r.druif?`<dt>Druiven</dt><dd>${h(r.druif)}</dd>`:""}${r.kleur?`<dt>Aandeel</dt><dd>${h(r.kleur)}</dd>`:""}${r.stijl?`<dt>Wijn</dt><dd>${h(r.stijl)}</dd>`:""}${r.ha?`<dt>Wijngaard</dt><dd>${h(r.ha)}</dd>`:""}</dl>${(()=>{const z=splitInfo(r.info,r.n);return z.o?`<p>${h(z.o)}</p>`:""})()}</section>`:`<p class="muted small">Tik op een gebied voor uitleg.</p>`}
   ${(()=>{const K=r&&klimOf(D,r),W=r&&WEB[r.n];if(!K&&!W)return "";const own=K&&K.from===r;return `<section class="card"><h3>Klimaat en bodem: ${h(r.n)}</h3>${K?`${!own?`<p class="small muted">Over ${h(r.n)} zelf staat ${W?"in het boek":"hier"} niets; ${W?"uit het boek over":"dit geldt voor"} ${h(K.from.n)}:</p>`:""}<dl>${K.k?`<dt>Klimaat</dt><dd>${h(K.k)}</dd>`:""}${K.b?`<dt>Bodem</dt><dd>${h(K.b)}</dd>`:""}</dl>`:""}${W?`<div class="webinfo"><p class="small"><b>Van internet</b> · niet uit het boek</p><dl><dt>Ligging en klimaat</dt><dd>${h(W.k)}</dd><dt>Bodem</dt><dd>${h(W.b)}</dd></dl><p class="small muted">Bron: ${h(W.s)}</p></div>`:""}</section>`})()}
+  ${(()=>{const id=r&&climOf(D,r);if(!id)return "";const C=CLIM[id];return `<section class="card"><h3>Klimaat in cijfers: ${h(r.n)}</h3><p class="small muted">Van internet, niet uit het boek: normalen 1991–2020 van weerstation ${h(C[0])} (bron: ${h(C[1])}, via Wikipedia). Een station in de buurt; in de wijngaarden kan het iets anders zijn.</p>${climChart(id,climCmp)}<label class="small">Vergelijk met <select id="climcmp"><option value="">(geen)</option>${Object.keys(CLIM).filter(k=>k!==id).map(k=>`<option value="${k}"${k===climCmp?" selected":""}>${h(CLIM[k][0])}</option>`).join("")}</select></label></section>`})()}
   <section class="card"><h3>Wat bepaalt het klimaat in ${h(D.title)}?</h3><div class="row">${Object.entries(D.layers).map(([k,l])=>`<button class="chip" data-act="g-layer" data-id="${k}" aria-pressed="${geo.layer===k}">${l[0]}</button>`).join("")}</div>
     ${geo.layer?`<p class="note">${h(D.layers[geo.layer][1])}</p>`:""}</section>
   ${(()=>{const own=r&&secOf(D,r),id=(!geo.secPick&&own)||(D.sections.some(x=>x[0]===geo.sec)?geo.sec:D.sections[0][0]),S=section(id),nm=D.sections.find(x=>x[0]===id)[1];
@@ -1733,7 +1778,7 @@ view.addEventListener("click",e=>{
   render();if(scroll)top();
 });
 // Back-up terugzetten uit een bestand.
-view.addEventListener("change",e=>{if(e.target.id!=="bkfile")return;const f=e.target.files&&e.target.files[0];if(!f)return;
+view.addEventListener("change",e=>{if(e.target.id==="climcmp"){climCmp=e.target.value;render();return}if(e.target.id!=="bkfile")return;const f=e.target.files&&e.target.files[0];if(!f)return;
   f.text().then(v=>{const o=JSON.parse(v);if(!o||typeof o!=="object"||!o.stats)throw 0;store=Object.assign(fresh(),o);save();applyTheme();bkMsg="Teruggezet uit "+f.name+". Je voortgang is weer zoals in de back-up."})
    .catch(()=>{bkMsg="Dit bestand is geen back-up van de Wijnbrevet Trainer. Kies het bestand dat begint met wijnbrevet-backup."}).finally(render)});
 view.addEventListener("input",e=>{if(e.target.id==="zoek"){zoek=e.target.value;const r=document.getElementById("zoekres");if(r)r.innerHTML=hitsHTML(zoek)}});
