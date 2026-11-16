@@ -585,7 +585,7 @@ function tasteQ(){
 if(typeof document!=="undefined"){
 const view=document.getElementById("view");
 const ABC=["A","B","C"];
-let tab="start",copied=false,gview=null,quiz=null,setup={topics:["druiven","gebieden","termen","duitsland","oostenrijk","frankrijk"],n:10},bkText="",bkMsg="",zoek="",build=null,taste=null,confirmReset=false;
+let tab="start",copied=false,gview=null,quiz=null,setup={topics:["druiven","gebieden","termen","duitsland","oostenrijk","frankrijk"],n:10},bkMsg="",zoek="",build=null,taste=null,confirmReset=false;
 const h=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
 
 function record(q,ok){
@@ -946,13 +946,12 @@ function vStart(){
     <div class="row"><button class="btn" data-act="copyflags">${copied?"Gekopieerd":"Kopieer lijst"}</button><button class="btn ghost" data-act="clearflags">Lijst legen</button></div></section>`:""}
   <section class="card"><h3>Het examen</h3><dl><dt>Vragen</dt><dd>60 meerkeuze: 54 theorie, 6 proef</dd><dt>Tijd</dt><dd>75 minuten</dd><dt>Geslaagd</dt><dd>36 van 60 goed, waarvan minstens 2 proefvragen</dd></dl>
     <p class="muted small">Aantal vragen volgens het boek. Tijd en slaaggrens volgens jedewijn.nl, nog niet bij SDEN zelf nagekeken.</p></section>
-  <p class="muted small">Komt nog: wijn maken, wet en etiket, filmpjes en de koppeling met Mijn Wijnboek.</p>
+  <p class="muted small">Komt nog: wijn maken, wet en etiket, en filmpjes.</p>
   <section class="card"><h3>Instellingen</h3>
     <div class="field"><span class="small">Weergave</span><div class="row">${[["auto","Automatisch"],["light","Licht"],["dark","Donker"]].map(t=>`<button class="chip" data-act="theme" data-id="${t[0]}" aria-pressed="${(store.theme||"auto")===t[0]}">${t[1]}</button>`).join("")}</div></div>
-    <div class="field"><span class="small">Back-up van je voortgang</span><p class="muted small">Je voortgang staat alleen in deze browser. Met een back-up kun je hem bewaren of meenemen naar een ander toestel: maak de back-up, bewaar de tekst, en plak hem later hier terug.</p>
-      <textarea id="bk" placeholder="Plak hier een back-up om hem terug te zetten">${h(bkText)}</textarea>
+    <div class="field"><span class="small">Back-up van je voortgang</span><p class="muted small">Je voortgang staat alleen in deze app. Met een back-up bewaar je hem als bestandje, bijvoorbeeld in je Downloads of in Google Drive, en zet je hem later of op een ander toestel weer terug.</p>
       ${bkMsg?`<p class="note small">${h(bkMsg)}</p>`:""}
-      <div class="row"><button class="btn ghost" data-act="bk-make">Maak back-up</button><button class="btn ghost" data-act="bk-load">Zet terug</button></div></div>
+      <div class="row"><button class="btn ghost" data-act="bk-make">⬇️ Back-up maken</button><label class="btn ghost">⬆️ Terugzetten<input type="file" id="bkfile" accept=".json,application/json" hidden></label></div></div>
     ${confirmReset?`<div class="row"><button class="btn" data-act="reset-yes">Ja, wis alles</button><button class="btn ghost" data-act="reset-no">Annuleren</button></div>`:`<button class="btn ghost" data-act="reset">Voortgang wissen</button>`}</section>`;
 }
 /* ---------- Koppeling met Mijn Wijnboek ----------
@@ -1520,9 +1519,9 @@ view.addEventListener("click",e=>{
   else if(a==="s-region"){const [land,n]=d.n.split("|"),D=GEO[land],r=all(D).find(x=>x.n===n);tab="kaart";zoek="";geo.land=land;geo.quiz=null;geo.sel=n;geo.sec=D.sections[0][0];
     if(r){fitBox(regionBox(r));geo.z=Math.max(geo.z,(r.zl||D.zdeep||ZPLACES)+.2)}try{location.hash=tab}catch(e){}scroll=true}
   else if(a==="theme"){store.theme=d.id;save();applyTheme()}
-  else if(a==="bk-make"){bkText=JSON.stringify(store);bkMsg="Back-up gemaakt. Kopieer de tekst hierboven en bewaar hem, bijvoorbeeld in een notitie of een mail aan jezelf.";try{navigator.clipboard.writeText(bkText).then(()=>{bkMsg="Back-up gekopieerd. Plak hem in een notitie of een mail aan jezelf om hem te bewaren.";render()}).catch(()=>{})}catch(e){}}
-  else if(a==="bk-load"){const el=document.getElementById("bk"),v=el?el.value.trim():"";bkText=v;
-    try{const o=JSON.parse(v);if(!o||typeof o!=="object"||!o.stats)throw 0;store=Object.assign(fresh(),o);save();applyTheme();bkMsg="Teruggezet. Je voortgang is weer zoals in de back-up."}catch(e){bkMsg=v?"Dit is geen geldige back-up. Plak de hele tekst, van { tot en met }.":"Plak eerst de tekst van je back-up in het vak."}}
+  else if(a==="bk-make"){const blob=new Blob([JSON.stringify(store)],{type:"application/json"}),u=URL.createObjectURL(blob),el=document.createElement("a");
+    el.href=u;el.download="wijnbrevet-backup-"+today()+".json";document.body.appendChild(el);el.click();el.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);
+    bkMsg="Back-up gedownload als "+el.download+". Je vindt hem in je Downloads; bewaar hem eventueel ook in Google Drive."}
   else if(a==="next"){quiz.i++;quiz.pick=null;quiz.flagged=false;scroll=true}
   else if(a==="stop"){quiz=null;scroll=true}
   else if(a==="grape"){newBuild(byName(d.n));scroll=true}
@@ -1561,9 +1560,13 @@ view.addEventListener("click",e=>{
   else if(a==="g-sec")geo.sec=d.id;
   else if(a==="reset")confirmReset=true;
   else if(a==="reset-no")confirmReset=false;
-  else if(a==="reset-yes"){const t=store.theme;store=fresh();store.theme=t;save();confirmReset=false;bkText="";bkMsg=""}
+  else if(a==="reset-yes"){const t=store.theme;store=fresh();store.theme=t;save();confirmReset=false;bkMsg=""}
   render();if(scroll)top();
 });
+// Back-up terugzetten uit een bestand.
+view.addEventListener("change",e=>{if(e.target.id!=="bkfile")return;const f=e.target.files&&e.target.files[0];if(!f)return;
+  f.text().then(v=>{const o=JSON.parse(v);if(!o||typeof o!=="object"||!o.stats)throw 0;store=Object.assign(fresh(),o);save();applyTheme();bkMsg="Teruggezet uit "+f.name+". Je voortgang is weer zoals in de back-up."})
+   .catch(()=>{bkMsg="Dit bestand is geen back-up van de Wijnbrevet Trainer. Kies het bestand dat begint met wijnbrevet-backup."}).finally(render)});
 view.addEventListener("input",e=>{if(e.target.id==="zoek"){zoek=e.target.value;const r=document.getElementById("zoekres");if(r)r.innerHTML=hitsHTML(zoek)}});
 // Klok van het oefenexamen: alleen het klokje bijwerken; is de tijd om, dan stopt het examen.
 setInterval(()=>{if(!quiz||!quiz.exam||quiz.done)return;const left=quiz.end-Date.now();if(left<=0){quiz.timeup=true;finishExam();if(tab==="overhoren"){render();top()}}else{const c=document.getElementById("clock");if(c)c.textContent=clock(left)}},1000);
