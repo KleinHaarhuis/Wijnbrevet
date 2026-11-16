@@ -192,6 +192,7 @@ textarea{width:100%;min-height:110px;font:inherit;font-size:.82rem;color:var(--i
 @media (prefers-reduced-motion:no-preference){.bar i{transition:width .3s}}
 .webinfo dl{grid-template-columns:1fr;gap:2px}.webinfo dd{margin:0 0 6px}.webinfo{margin-top:.8rem;padding:.6rem .8rem;border-left:3px solid var(--accent);background:rgba(107,143,113,.08);border-radius:6px}
 .clim{width:100%;height:auto;display:block;margin:.4rem 0}.clim .cg{stroke:var(--line,rgba(0,0,0,.12));stroke-width:.6}.clim text{font-size:9px;fill:var(--muted)}.clim .cb{fill:var(--water,#4f8c88);opacity:.75}.clim .cb2{fill:var(--gold,#b3913f);opacity:.75}.clim polyline.cl{fill:none;stroke:var(--rose,#a8687b);stroke-width:2}.clim circle.cl{fill:var(--rose,#a8687b)}.clim polyline.cl2{fill:none;stroke:var(--accent);stroke-width:2;stroke-dasharray:4 3}.clim circle.cl2{fill:var(--accent)}.key{display:inline-block;width:10px;height:10px;border-radius:2px;margin:0 3px 0 6px;vertical-align:-1px}.key.kl{background:var(--rose,#a8687b)}.key.kb{background:var(--water,#4f8c88)}.key.kl2{background:var(--accent)}.key.kb2{background:var(--gold,#b3913f)}#climcmp{margin-left:6px}
+.map .reg.gr{fill:var(--gold);fill-opacity:.6;stroke:var(--gold)}.map .reg.dim{fill-opacity:.07;stroke-opacity:.35}#grapesel{margin-left:6px;max-width:58vw}
 </style>
 </head>
 <body>
@@ -813,7 +814,7 @@ function vGrape(g){
   <section class="card hero">
     <div class="herotext"><h2><i class="swatch ${g.c}"></i>${h(g.n)}</h2>${g.synT?`<p class="small muted">Ook: ${h(g.synT)}</p>`:""}
       <p class="small">${h(g.hT)}</p>
-      <button class="btn" data-act="grape" data-n="${h(g.n)}">Test jezelf eerst</button>
+      <button class="btn" data-act="grape" data-n="${h(g.n)}">Test jezelf eerst</button> ${Object.keys(grapeRegs(g)).length?`<button class="btn ghost" data-act="g-showgrape" data-n="${h(g.n)}">🗺️ Op de kaart</button>`:""}
       ${score!==undefined?`<p class="small muted">Beste score: ${score}%</p>`:""}</div>
     <figure>${plate(g,500)}<figcaption id="platecredit" class="src" hidden>${p?`${p[2]||"Viala &amp; Vermorel, <i>Ampélographie</i> (1901–1910)"}${p[1]?", "+h(p[1]):""}. Publiek domein, <a href="${filePage(p[0])}">Wikimedia Commons</a>.`:""}</figcaption></figure>
   </section>
@@ -1366,7 +1367,8 @@ function mapSVG(){
   const mid=r=>[r.poly.reduce((a,p)=>a+p[0],0)/r.poly.length,r.poly.reduce((a,p)=>a+p[1],0)/r.poly.length];
   // Deelgebieden (parent) krijgen pas vanaf hun eigen zoomniveau (zl) een naam, plaatsen en druiven.
   const shown=r=>!r.parent||geo.z>=(r.zl||ZD),kidZ=r=>{const kk=(D.subs||[]).filter(x=>x.parent===r.n);return kk.length?Math.min(...kk.map(x=>x.zl||ZD)):99};
-  const cls=r=>(q?(q.wrong===r.n?"reg bad":inQ(r)?"reg q":"reg"):geo.sel===r.n?"reg sel":"reg")+(r.parent?" kid":"");
+  const GR=!q&&geo.grape&&byName(geo.grape)?(grapeRegs(byName(geo.grape))[geo.land]||[]):null;
+  const cls=r=>(q?(q.wrong===r.n?"reg bad":inQ(r)?"reg q":"reg"):geo.sel===r.n?"reg sel":"reg")+(r.parent?" kid":"")+(GR?(GR.includes(r.n)?" gr":" dim"):"");
   let o=`<svg class="map ms-${mstyle()}" viewBox="${f(v.x0)} ${f(v.y0)} ${f(v.w)} ${f(v.h)}" role="img" aria-label="Kaart van de wijngebieden van ${h(D.title)}">`;
   if(geo.prov===null)geo.prov=MSTYLE[mstyle()][1];
   if(!geo.noTiles){const T=TILE[geo.prov],zt=Math.min(z,T.max||99),sc=2**(z-zt),max=2**zt-1,S=256*sc;for(let ty=Math.max(0,Math.floor(v.y0/S));ty<=Math.min(max,Math.floor((v.y0+v.h)/S));ty++)for(let tx=Math.floor(v.x0/S);tx<=Math.floor((v.x0+v.w)/S);tx++)o+=`<image href="${T.url(zt,tx,ty)}" x="${tx*S}" y="${ty*S}" width="${S+.5}" height="${S+.5}"/>`}
@@ -1675,6 +1677,9 @@ return g+`<p class="small"><span class="key kl"></span> temperatuur <span class=
 function klimOf(D,r){for(let x=r;x;x=x.parent&&all(D).find(y=>y.n===x.parent)){const z=splitInfo(x.info,x.n);if(x.klimaat||x.bodem||z.k||z.b)return {from:x,k:x.klimaat||z.k,b:x.bodem||z.b}}return null}
 const SECFOR={mosel:["Mosel"],rheingau:["Rheingau"],pfalz:["Pfalz"],franken:["Franken"],wachau:["Wachau"],neusiedl:["Neusiedlersee","Burgenland"],steiermark:["Steiermark","Südsteiermark"],valais:["Valais"],vogezen:["Alsace"],chablis:["Chablis"],cotedor:["Côte de Nuits","Côte de Beaune","Bourgogne"],champagne:["Champagne"],nrhone:["Noordelijke Rhône","Rhône"],zrhone:["Zuidelijke Rhône"],sauternes:["Sauternes","Barsac","Coteaux du Layon"],medoc:["Médoc","Bordeaux"]};
 function secOf(D,r){for(let x=r;x;x=x.parent&&all(D).find(y=>y.n===x.parent)){const k=Object.keys(SECFOR).find(k=>SECFOR[k].includes(x.n)&&D.sections.some(s=>s[0]===k));if(k)return k}return null}
+// Druivenkaart: welke gebieden horen bij een druif (herkomst, druivenlijst op de kaart en de druiventekst per gebied).
+const grapeRegs=g=>{const keys=[g.n,...g.syn].map(x=>x.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g,"\\$&")),re=new RegExp("(^|[^a-zà-ÿ])("+keys.join("|")+")($|[^a-zà-ÿ])","i"),out={};
+  for(const l in GEO){const L=all(GEO[l]).filter(r=>(g.h||[]).includes(r.n)||(RDR[r.n]||[]).some(d=>grapeOf(d[0])===g)||(r.druif&&re.test(r.druif))).map(r=>r.n);if(L.length)out[l]=L}return out};
 function vGeo(){
   const D=GEO[geo.land],q=geo.quiz,r=geo.sel&&all(D).find(x=>x.n===geo.sel),n=q?q.order.length:all(D).length,hasKids=r&&all(D).some(x=>x.parent===r.n);
   const note=geo.noTiles?"De reliëfkaart laadt hier niet. Op GitHub verschijnt hij onder de gebieden.":geo.credit?TILE[geo.prov].credit:"Reliëf laden…";
@@ -1682,6 +1687,7 @@ function vGeo(){
   return `<div class="row">${Object.keys(GEO).map(k=>`<button class="chip" data-act="g-land" data-n="${k}" aria-pressed="${geo.land===k}">${k}</button>`).join("")}</div><h2>${h(D.title)}</h2>
   ${q?(q.i<n?`<p class="note"><strong>Tik op: ${h(q.order[q.i])}</strong> <span class="muted">(${q.i+1} van ${n})</span>${q.wrong?`<br>Dat is ${h(q.wrong)}. Probeer het nog eens.`:""}</p>`:`<p class="note"><strong>${q.good} van de ${n} in één keer goed.</strong></p>`):""}
   <div class="mapwrap" id="mapwrap">${mapSVG()}<div class="mapctl"><button data-act="g-plus" aria-label="Inzoomen">+</button><button data-act="g-minus" aria-label="Uitzoomen">−</button><button data-act="g-home" aria-label="Heel ${h(D.title)}">⌂</button></div></div>
+  ${q?"":(()=>{const g=geo.grape&&byName(geo.grape),R=g?grapeRegs(g):{},here=R[geo.land]||[];return `<div class="row small"><label class="muted">Druif op de kaart <select id="grapesel"><option value="">(geen)</option>${G.map(x=>`<option${g&&x.n===g.n?" selected":""}>${h(x.n)}</option>`).join("")}</select></label>${g?`<button class="chip" data-act="g-nogrape">✕ wissen</button>`:""}</div>${g?`<p class="note small"><strong>${h(g.n)}</strong>: ${here.length?`${here.length} ${here.length===1?"gebied":"gebieden"} gekleurd in ${h(geo.land)} (${h(here.join(", "))})`:(Object.keys(R).length?`niet in ${h(geo.land)} volgens de app`:"zijn landen staan nog niet in de app")}.${Object.keys(R).filter(l=>l!==geo.land).map(l=>` <button class="chip" data-act="g-land" data-n="${l}">${l} (${R[l].length})</button>`).join("")} <span class="muted">Herkomst: ${h(g.hT)}</span></p>`:""}`})()}
   <div class="row small"><span class="muted">Kaartstijl</span>${Object.entries(MSTYLE).map(([k,v])=>`<button class="chip" data-act="g-style" data-id="${k}" aria-pressed="${mstyle()===k}">${v[0]}</button>`).join("")}</div>
   <p class="src" id="tilenote">${h(note)} ${h(D.grens)}</p>
   <p class="muted small">Knijp, scroll of dubbeltik om in te zoomen. Ingezoomd verschijnen de deelgebieden, plaatsen en belangrijkste druiven uit het boek. Tik op een onderstreepte druif voor zijn pagina.</p>
@@ -1772,13 +1778,15 @@ view.addEventListener("click",e=>{
   else if(a==="g-plus"){zoomBy(2);return}
   else if(a==="g-minus"){zoomBy(.5);return}
   else if(a==="g-sec"){geo.sec=d.id;geo.secPick=true}
+  else if(a==="g-nogrape"){geo.grape=null}
+  else if(a==="g-showgrape"){const g=byName(d.n),R=grapeRegs(g),ls=Object.keys(R);geo.grape=g.n;const l=R[geo.land]?geo.land:ls.sort((x,y)=>R[y].length-R[x].length)[0];if(l&&l!==geo.land){geo.land=l;geo.sel=null;geo.quiz=null;geo.sec=GEO[l].sections[0][0]}geo.c=null;tab="kaart";try{location.hash=tab}catch(e){}scroll=true}
   else if(a==="reset")confirmReset=true;
   else if(a==="reset-no")confirmReset=false;
   else if(a==="reset-yes"){const t=store.theme;store=fresh();store.theme=t;save();confirmReset=false;bkMsg=""}
   render();if(scroll)top();
 });
 // Back-up terugzetten uit een bestand.
-view.addEventListener("change",e=>{if(e.target.id==="climcmp"){climCmp=e.target.value;render();return}if(e.target.id!=="bkfile")return;const f=e.target.files&&e.target.files[0];if(!f)return;
+view.addEventListener("change",e=>{if(e.target.id==="grapesel"){geo.grape=e.target.value||null;if(geo.grape){const R=grapeRegs(byName(geo.grape)),ls=Object.keys(R).sort((x,y)=>R[y].length-R[x].length);if(!R[geo.land]&&ls[0]){geo.land=ls[0];geo.sel=null;geo.sec=GEO[ls[0]].sections[0][0];geo.c=null}}render();return}if(e.target.id==="climcmp"){climCmp=e.target.value;render();return}if(e.target.id!=="bkfile")return;const f=e.target.files&&e.target.files[0];if(!f)return;
   f.text().then(v=>{const o=JSON.parse(v);if(!o||typeof o!=="object"||!o.stats)throw 0;store=Object.assign(fresh(),o);save();applyTheme();bkMsg="Teruggezet uit "+f.name+". Je voortgang is weer zoals in de back-up."})
    .catch(()=>{bkMsg="Dit bestand is geen back-up van de Wijnbrevet Trainer. Kies het bestand dat begint met wijnbrevet-backup."}).finally(render)});
 view.addEventListener("input",e=>{if(e.target.id==="zoek"){zoek=e.target.value;const r=document.getElementById("zoekres");if(r)r.innerHTML=hitsHTML(zoek)}});
