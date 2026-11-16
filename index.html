@@ -164,7 +164,10 @@ textarea{width:100%;min-height:110px;font:inherit;font-size:.82rem;color:var(--i
 .map .grp .gw{fill:var(--gold);stroke:var(--surface);stroke-width:1px;vector-effect:non-scaling-stroke}.map .grp .gb{fill:var(--rose);stroke:var(--surface);stroke-width:1px;vector-effect:non-scaling-stroke}
 .map .grp.link text,.map .grp.link circle{pointer-events:all}
 /* Reliëf grijs maken, zodat bergen (bruin/rood op de topokaart) niet verward worden met de rode wijngebieden. */
-.map image{filter:grayscale(.9) contrast(1.05) brightness(1.04)}
+/* Kaartstijl (keuze onder de kaart). Natuur: groen-bruin reliëf zonder rood. Topo: OpenTopoMap met gedempte kleuren. Grijs: zoals eerst. */
+.map.ms-natuur image{filter:saturate(.9) brightness(1.02)}
+.map.ms-topo image{filter:saturate(.55) sepia(.12) brightness(1.03)}
+.map.ms-grijs image{filter:grayscale(.9) contrast(1.05) brightness(1.04)}
 .map .reg,.map .hit{fill-rule:evenodd}
 .map .reg{fill:var(--region);fill-opacity:.3;stroke:var(--region);stroke-width:2;vector-effect:non-scaling-stroke;stroke-linejoin:round}
 .map .reg.kid{fill-opacity:.22;stroke-width:1.5;stroke-dasharray:5 3}
@@ -1032,9 +1035,12 @@ function applyTheme(){const t=store.theme,R=document.documentElement;if(t==="lig
 /* ---------- Kaart ---------- */
 // Reliëfondergrond: de eerste dienst die tegels levert, wordt gebruikt.
 const TILE=[
+  {url:(z,x,y)=>`https://server.arcgisonline.com/ArcGIS/rest/services/World_Terrain_Base/MapServer/tile/${z}/${y}/${x}`,credit:"Kaart: © Esri, USGS, NOAA",max:13},
   {url:(z,x,y)=>`https://${"abc"[(x+y)%3]}.tile.opentopomap.org/${z}/${x}/${y}.png`,credit:"Kaart: © OpenTopoMap (CC-BY-SA), gegevens © OpenStreetMap-bijdragers en SRTM"},
   {url:(z,x,y)=>`https://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/${z}/${y}/${x}`,credit:"Reliëf: © Esri"}
 ];
+const MSTYLE={natuur:["Natuur",0],topo:["Topo",1],grijs:["Grijs",1]};
+const mstyle=()=>MSTYLE[store.mapStyle]?store.mapStyle:"natuur";
 // poly = oude, met de hand ingetekende grens; alleen nog terugval. De echte grenzen staan in RB hieronder.
 const GEO={Duitsland:{box:[47.45,6.1,50.8,10.85],
   regions:[
@@ -1261,7 +1267,7 @@ Frankrijk:{title:"Frankrijk",box:[41.35,-2.2,49.5,9.6],zdeep:7,quizTop:true,gren
   ]
 }};
 const LAB={Niederösterreich:[48.08,15.5],Wien:[48.27,16.37],Burgenland:[47.12,16.3],Steiermark:[47.18,15.5],Wachau:[48.35,15.36],Kremstal:[48.48,15.56],Kamptal:[48.55,15.72],Weinviertel:[48.62,16.3],Carnuntum:[48.0,16.9],Neusiedlersee:[47.87,17.02],Mittelburgenland:[47.5,16.47],Südsteiermark:[46.7,15.5],Valais:[46.17,7.6],Vaud:[46.6,6.55],Ticino:[46.08,9.2],Ahr:[50.68,7.1],Mosel:[50.02,6.7],Nahe:[49.7,7.6],Rheingau:[50.06,8.1],Rheinhessen:[49.76,8.19],Pfalz:[49.25,8.17],Baden:[48.45,8.0],Franken:[50.02,10.12]};
-let geo={land:"Duitsland",c:null,z:6,wpx:360,lastMove:0,sel:null,layer:"riv",quiz:null,prov:0,noTiles:false,credit:false,sec:"mosel"};
+let geo={land:"Duitsland",c:null,z:6,wpx:360,lastMove:0,sel:null,layer:"riv",quiz:null,prov:null,noTiles:false,credit:false,sec:"mosel"};
 function px(lat,lon,z){const n=256*2**z,s=Math.sin(lat*Math.PI/180);return [(lon+180)/360*n,(.5-Math.log((1+s)/(1-s))/(4*Math.PI))*n]}
 function geoView(box){
   let [S,W,N,E]=box;const a=(N-S)*.06,b=(E-W)*.06;S-=a;N+=a;W-=b;E+=b;
@@ -1358,8 +1364,9 @@ function mapSVG(){
   // Deelgebieden (parent) krijgen pas vanaf hun eigen zoomniveau (zl) een naam, plaatsen en druiven.
   const shown=r=>!r.parent||geo.z>=(r.zl||ZD),kidZ=r=>{const kk=(D.subs||[]).filter(x=>x.parent===r.n);return kk.length?Math.min(...kk.map(x=>x.zl||ZD)):99};
   const cls=r=>(q?(q.wrong===r.n?"reg bad":inQ(r)?"reg q":"reg"):geo.sel===r.n?"reg sel":"reg")+(r.parent?" kid":"");
-  let o=`<svg class="map" viewBox="${f(v.x0)} ${f(v.y0)} ${f(v.w)} ${f(v.h)}" role="img" aria-label="Kaart van de wijngebieden van ${h(D.title)}">`;
-  if(!geo.noTiles){const T=TILE[geo.prov],max=2**z-1;for(let ty=Math.max(0,Math.floor(v.y0/256));ty<=Math.min(max,Math.floor((v.y0+v.h)/256));ty++)for(let tx=Math.floor(v.x0/256);tx<=Math.floor((v.x0+v.w)/256);tx++)o+=`<image href="${T.url(z,tx,ty)}" x="${tx*256}" y="${ty*256}" width="256.5" height="256.5"/>`}
+  let o=`<svg class="map ms-${mstyle()}" viewBox="${f(v.x0)} ${f(v.y0)} ${f(v.w)} ${f(v.h)}" role="img" aria-label="Kaart van de wijngebieden van ${h(D.title)}">`;
+  if(geo.prov===null)geo.prov=MSTYLE[mstyle()][1];
+  if(!geo.noTiles){const T=TILE[geo.prov],zt=Math.min(z,T.max||99),sc=2**(z-zt),max=2**zt-1,S=256*sc;for(let ty=Math.max(0,Math.floor(v.y0/S));ty<=Math.min(max,Math.floor((v.y0+v.h)/S));ty++)for(let tx=Math.floor(v.x0/S);tx<=Math.floor((v.x0+v.w)/S);tx++)o+=`<image href="${T.url(zt,tx,ty)}" x="${tx*S}" y="${ty*S}" width="${S+.5}" height="${S+.5}"/>`}
   if(geo.layer==="berg")for(const m of D.mounts){const [x,y]=P(m[1],m[2]),rx=m[3]/360*256*2**z,ry=Math.abs(P(m[1]+m[4],m[2])[1]-y);o+=`<ellipse class="mount" cx="${f(x)}" cy="${f(y)}" rx="${f(rx)}" ry="${f(ry)}"/>`}
   const inQ=r=>q&&q.order.includes(r.n),vis=r=>q?(inQ(r)||!r.parent):(!r.parent||geo.z>=(r.zl||ZD)-1.5);
   for(const r of A)if(vis(r))o+=`<path class="${cls(r)}" d="${dp(r)}"/>`;
@@ -1474,6 +1481,7 @@ function vGeo(){
   return `<div class="row">${Object.keys(GEO).map(k=>`<button class="chip" data-act="g-land" data-n="${k}" aria-pressed="${geo.land===k}">${k}</button>`).join("")}</div><h2>${h(D.title)}</h2>
   ${q?(q.i<n?`<p class="note"><strong>Tik op: ${h(q.order[q.i])}</strong> <span class="muted">(${q.i+1} van ${n})</span>${q.wrong?`<br>Dat is ${h(q.wrong)}. Probeer het nog eens.`:""}</p>`:`<p class="note"><strong>${q.good} van de ${n} in één keer goed.</strong></p>`):""}
   <div class="mapwrap" id="mapwrap">${mapSVG()}<div class="mapctl"><button data-act="g-plus" aria-label="Inzoomen">+</button><button data-act="g-minus" aria-label="Uitzoomen">−</button><button data-act="g-home" aria-label="Heel ${h(D.title)}">⌂</button></div></div>
+  <div class="row small"><span class="muted">Kaartstijl</span>${Object.entries(MSTYLE).map(([k,v])=>`<button class="chip" data-act="g-style" data-id="${k}" aria-pressed="${mstyle()===k}">${v[0]}</button>`).join("")}</div>
   <p class="src" id="tilenote">${h(note)} ${h(D.grens)}</p>
   <p class="muted small">Knijp, scroll of dubbeltik om in te zoomen. Ingezoomd verschijnen de deelgebieden, plaatsen en belangrijkste druiven uit het boek. Tik op een onderstreepte druif voor zijn pagina.</p>
   ${(()=>{const n=cellar.filter(w=>w.loc).length;if(!n||q)return "";const w=geo.mine!==false&&geo.wine&&cellar.find(x=>x.id===geo.wine);
@@ -1551,6 +1559,7 @@ view.addEventListener("click",e=>{
   else if(a==="g-explore")geo.quiz=null;
   else if(a==="g-zoom"){const D=GEO[geo.land],r=all(D).find(x=>x.n===geo.sel);if(r){fitBox(regionBox(r));geo.z=Math.max(geo.z,(r.zl||D.zdeep||ZPLACES)+.2)}try{document.getElementById("mapwrap").scrollIntoView({block:"start",behavior:"smooth"})}catch(e){}}
   else if(a==="g-home")geo.c=null;
+  else if(a==="g-style"){store.mapStyle=d.id;save();geo.prov=MSTYLE[d.id][1];geo.noTiles=false;geo.credit=false}
   else if(a==="g-wine"){if(Date.now()-geo.lastMove<450)return;geo.wine=geo.wine===d.id?null:d.id}
   else if(a==="g-mine"){geo.mine=geo.mine===false;geo.wine=null}
   else if(a==="g-land"){if(geo.land!==d.n){geo.land=d.n;geo.c=null;geo.sel=null;geo.quiz=null;geo.sec=GEO[d.n].sections[0][0]}}
