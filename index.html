@@ -193,6 +193,16 @@ textarea{width:100%;min-height:110px;font:inherit;font-size:.82rem;color:var(--i
 .webinfo dl{grid-template-columns:1fr;gap:2px}.webinfo dd{margin:0 0 6px}.webinfo{margin-top:.8rem;padding:.6rem .8rem;border-left:3px solid var(--accent);background:rgba(107,143,113,.08);border-radius:6px}
 .clim{width:100%;height:auto;display:block;margin:.4rem 0}.clim .cg{stroke:var(--line,rgba(0,0,0,.12));stroke-width:.6}.clim text{font-size:9px;fill:var(--muted)}.clim .cb{fill:var(--water,#4f8c88);opacity:.75}.clim .cb2{fill:var(--gold,#b3913f);opacity:.75}.clim polyline.cl{fill:none;stroke:var(--rose,#a8687b);stroke-width:2}.clim circle.cl{fill:var(--rose,#a8687b)}.clim polyline.cl2{fill:none;stroke:var(--accent);stroke-width:2;stroke-dasharray:4 3}.clim circle.cl2{fill:var(--accent)}.key{display:inline-block;width:10px;height:10px;border-radius:2px;margin:0 3px 0 6px;vertical-align:-1px}.key.kl{background:var(--rose,#a8687b)}.key.kb{background:var(--water,#4f8c88)}.key.kl2{background:var(--accent)}.key.kb2{background:var(--gold,#b3913f)}#climcmp{margin-left:6px}
 .map .reg.gr{fill:var(--gold);fill-opacity:.6;stroke:var(--gold)}.map .reg.dim{fill-opacity:.07;stroke-opacity:.35}#grapesel{margin-left:6px;max-width:58vw}
+.lab{border-radius:6px;padding:18px 14px 14px;margin:.6rem 0;display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:0 2px 10px rgba(0,0,0,.12);text-align:center}
+.lab-fr{background:#f7f1e3;color:#3a2a1c;font-family:Fraunces,Georgia,serif;border:3px double #8a6d3b}
+.lab-de{background:#fdfcf8;color:#1f2a24;border-top:10px solid #7b1e2e}
+.lab-at{background:#eef2e8;color:#1f2a1f;border:1px solid #6b7c55}
+.lp{background:none;border:1px dashed transparent;border-radius:4px;color:inherit;font:inherit;padding:2px 6px;cursor:pointer;line-height:1.2}
+.lp:hover,.lp.on{border-color:var(--rose);background:rgba(168,104,123,.12)}.lp.ok{border-color:var(--accent);background:rgba(107,143,113,.18)}
+.lp-prod{font-size:1.25rem;font-style:italic;margin-bottom:6px}.lp-big{font-size:1.15rem;font-weight:600;letter-spacing:.02em}.lp-mid{font-size:1rem}.lp-small{font-size:.8rem;text-transform:uppercase;letter-spacing:.06em}.lp-mini{font-size:.72rem;display:inline-block}.lp-qr{font-size:.7rem;border:1px solid currentColor;padding:6px}
+.gloss{display:flex;flex-direction:column;gap:8px;margin-top:.6rem}.gl{display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 10px}.gl p{margin:.15rem 0}.say{font-size:1.2rem;background:none;border:1px solid var(--line);border-radius:50%;width:38px;height:38px;flex:none;cursor:pointer}
+.search{width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:inherit}
+.minirow{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:2px 6px;margin-top:8px}
 </style>
 </head>
 <body>
@@ -924,8 +934,104 @@ function searchHits(term){
   return out.slice(0,14);
 }
 const hitsHTML=term=>{const H=searchHits(term);return H.length?H.map(x=>x[0]?`<button class="hit2" data-act="${x[0]}" data-n="${h(x[1])}"><strong>${h(x[2])}</strong><span>${h(x[3])}</span></button>`:`<div class="hit2"><strong>${h(x[2])}</strong><span>${h(x[3])}</span></div>`).join(""):term.trim().length>1?`<p class="muted small">Niets gevonden.</p>`:""};
+/* ---------- Leren: etiketten lezen en woordenlijst ---------- */
+// Voorbeeldetiketten met verzonnen producenten. Per onderdeel: [tekst, stijlklasse, uitleg, bron].
+const SRC={eu:"EU-verordening 2019/33 en 1308/2013",dwi:"Deutsches Weininstitut",boek:"boek",ak:"algemene kennis, niet uit het boek"};
+const LABELS=[
+{id:"fr",t:"Frankrijk",cls:"lab-fr",parts:[
+["Domaine des Tilleuls","lp-prod","Naam van het wijnhuis. Een domaine (of château in Bordeaux) heeft eigen wijngaarden. Verzonnen naam.","ak"],
+["Pommard Premier Cru","lp-big","De appellation, hier een gemeente met een premier cru-wijngaard. Op het etiket is dit de 'verkoopbenaming'; voor AOP-wijn is de herkomstnaam verplicht.","eu"],
+["Appellation Pommard 1er Cru Contrôlée","lp-small","De formule die laat zien dat het een AOC/AOP-wijn is. In de pyramide van de Bourgogne staat premier cru net onder grand cru.","boek"],
+["2022","lp-mid","Het oogstjaar (millésime). Niet verplicht, wel gebruikelijk; vermeldt de producent het, dan moet minstens 85% van de druiven uit dat jaar komen.","ak"],
+["Mis en bouteille au domaine","lp-small","Gebotteld op het domein zelf. De bottelaar vermelden is verplicht.","eu"],
+["13,5 % vol","lp-mini","Het werkelijke alcoholpercentage. Verplicht, met de aanduiding % vol.","eu"],
+["75 cl","lp-mini","De nominale inhoud. Verplicht.","eu"],
+["Contient des sulfites","lp-mini","Allergenen zoals sulfieten moeten altijd op het etiket staan, ook als de ingrediënten via een QR-code worden getoond.","dwi"],
+["Produit de France","lp-mini","Het land van herkomst. Verplicht.","eu"],
+["L 2203","lp-mini","Het lotnummer, voor de traceerbaarheid. Verplicht, maar mag buiten het gezichtsveld van de andere verplichte gegevens staan.","eu"],
+["QR · ingrédients","lp-qr","Sinds oogst 2024 zijn de ingrediëntenlijst en de voedingswaarde verplicht; die mogen via een QR-code (e-label). De energiewaarde moet wel op het etiket zelf staan.","dwi"]]},
+{id:"de",t:"Duitsland",cls:"lab-de",parts:[
+["Weingut Steinbach","lp-prod","Naam van het wijngoed. Verzonnen naam.","ak"],
+["2023","lp-mid","Oogstjaar (Jahrgang).","ak"],
+["Riesling","lp-big","De druif. Niet verplicht, maar bij Duitse wijn bijna altijd vermeld.","ak"],
+["Spätlese","lp-big","Het Prädikat: de rijpheid van de druiven bij de oogst, gemeten in graden Oechsle. Van laag naar hoog: Kabinett, Spätlese, Auslese, Beerenauslese, Eiswein, Trockenbeerenauslese. Bij Prädikatswein mag geen suiker worden toegevoegd.","dwi"],
+["Mosel","lp-mid","Het Anbaugebiet. Qualitäts- en Prädikatswein moet voor 100% uit één van de 13 Duitse wijngebieden komen.","dwi"],
+["Prädikatswein","lp-small","De kwaliteitscategorie (wijn met beschermde oorsprongsbenaming). Bij Prädikatswein moet het Prädikat erbij staan.","dwi"],
+["A.P.Nr. 2 576 123 017 24","lp-mini","De amtliche Prüfungsnummer: elke Qualitäts- en Prädikatswein wordt chemisch en blind sensorisch gekeurd en krijgt dit nummer. Verplicht op het etiket.","dwi"],
+["Gutsabfüllung","lp-small","Gebotteld door het wijngoed zelf, van eigen druiven. (De bottelaar vermelden is verplicht.)","eu"],
+["8,5 % vol","lp-mini","Alcoholpercentage. Een Spätlese van de Mosel heeft vaak weinig alcohol en wat restzoet.","eu"],
+["750 ml","lp-mini","Nominale inhoud.","eu"],
+["Enthält Sulfite","lp-mini","Allergeen; moet altijd op het etiket.","dwi"]]},
+{id:"at",t:"Oostenrijk",cls:"lab-at",parts:[
+["Weingut Hofstätter","lp-prod","Naam van het wijngoed. Verzonnen naam.","ak"],
+["Wachau DAC","lp-big","DAC (Districtus Austriae Controllatus): een herkomstbenaming die de typiciteit van het gebied beschermt, te vergelijken met AOP. Oostenrijk heeft 18 DAC-gebieden.","boek"],
+["Ried Achleiten","lp-mid","Een Ried is een individuele wijngaard. Alleen de namen van de beste Rieden staan op etiketten.","boek"],
+["Grüner Veltliner","lp-mid","De druif; dé druif van Oostenrijk.","boek"],
+["Smaragd","lp-big","Eigen rijpheidsklasse van de Wachau, oplopend: Steinfeder, Federspiel, Smaragd. Smaragd is de rijpste en volste.","boek"],
+["2023","lp-mid","Oogstjaar.","ak"],
+["trocken","lp-small","Smaakaanduiding: droog.","ak"],
+["13,5 % vol","lp-mini","Alcoholpercentage.","eu"],
+["0,75 l","lp-mini","Nominale inhoud.","eu"],
+["Enthält Sulfite","lp-mini","Allergeen; moet altijd op het etiket.","eu"]]}];
+// Woordenlijst: [term, taal voor uitspraak, uitleg, bron]
+const GLOSS=[
+["Appellation d'Origine Contrôlée","fr-FR","AOC/AOP: beschermde herkomstbenaming met regels voor gebied, druiven en opbrengst.","boek"],
+["Grand Cru","fr-FR","In de Bourgogne de hoogste trede: de beste wijngaarden. In Bordeaux een aanduiding van wijnhuizen.","boek"],
+["Premier Cru","fr-FR","In de Bourgogne de trede onder grand cru.","boek"],
+["climat","fr-FR","In de Bourgogne: een benoemde wijngaard met eigen terroir.","boek"],
+["combe","fr-FR","Kloof of zijdal in de heuvelrug van de Côte d'Or.","boek"],
+["mis en bouteille au château","fr-FR","Op het château gebotteld.","ak"],
+["millésime","fr-FR","Oogstjaar.","ak"],
+["sur lie","fr-FR","Op de gistcellen gerijpt (bekend van Muscadet): frisser en voller.","ak"],
+["méthode traditionnelle","fr-FR","Mousserende wijn met tweede gisting in de fles, zoals champagne en crémant.","boek"],
+["liqueur d'expédition","fr-FR","De dosage: wijn met suiker die na het degorgeren wordt toegevoegd.","boek"],
+["Brut Nature","fr-FR","Champagne zonder toegevoegde suiker, max. 3 g/l.","boek"],
+["Blanc de Blancs","fr-FR","Mousserend van alleen witte druiven; in Champagne alleen chardonnay.","boek"],
+["Blanc de Noirs","fr-FR","Witte wijn van alleen blauwe druiven.","boek"],
+["Vendanges Tardives","fr-FR","Laat geoogst, zoet; in de Elzas.","boek"],
+["Sélection de Grains Nobles","fr-FR","Van druiven met edele rotting, zoet; in de Elzas.","boek"],
+["Edelzwicker","de-DE","Elzasser blend van meerdere druiven.","boek"],
+["tri successif","fr-FR","Plukken in meerdere rondes door de wijngaard, alleen de rijpste of botrytis-druiven (Sauternes).","boek"],
+["passerillage","fr-FR","Druiven aan de stok laten indrogen (Jurançon).","boek"],
+["macération semi-carbonique","fr-FR","Hele trossen in een afgesloten kuip; kenmerk van de Beaujolais.","boek"],
+["vin jaune","fr-FR","Gele wijn uit de Jura, jarenlang op vat onder een gistlaag.","boek"],
+["vin de paille","fr-FR","Strowijn: zoet, van op stromatten gedroogde druiven (Jura).","boek"],
+["galets roulés","fr-FR","Rolkeien in de bodem van de zuidelijke Rhône (Châteauneuf-du-Pape).","boek"],
+["croupes graveleuses","fr-FR","Glooiende kiezelrijke heuveltjes in de Médoc.","boek"],
+["Kabinett","de-DE","Laagste Prädikat: lichte wijn van rijpe druiven.","dwi"],
+["Spätlese","de-DE","Laat geoogst Prädikat.","dwi"],
+["Auslese","de-DE","Prädikat van volrijpe trossen; onrijpe bessen worden weggelaten.","dwi"],
+["Beerenauslese","de-DE","Prädikat van met de hand uitgezochte overrijpe of botrytis-bessen.","dwi"],
+["Trockenbeerenauslese","de-DE","Hoogste Prädikat: ingeschrompelde botrytis-bessen; niet elk jaar mogelijk.","dwi"],
+["Eiswein","de-DE","Van bevroren geoogste en geperste druiven, bij minstens −7 °C.","dwi"],
+["Gutsabfüllung","de-DE","Op het wijngoed gebotteld, van eigen druiven.","ak"],
+["Einzellage","de-DE","Een individuele wijngaard.","ak"],
+["feinherb","de-DE","Smaakaanduiding tussen droog en halfdroog in.","ak"],
+["Großes Gewächs","de-DE","Droge topwijn van een topwijngaard (nieuwe Duitse herkomstpyramide).","dwi"],
+["Steinfeder","de-DE","Lichtste rijpheidsklasse van de Wachau.","boek"],
+["Federspiel","de-DE","Middelste rijpheidsklasse van de Wachau.","boek"],
+["Smaragd","de-DE","Rijpste en volste klasse van de Wachau.","boek"],
+["Ried","de-DE","Oostenrijks woord voor een individuele wijngaard.","boek"],
+["Districtus Austriae Controllatus","la","DAC: Oostenrijkse herkomstbenaming.","boek"]];
+let learn={sub:"etiket",lab:"fr",part:null,q:null,gl:""};
+// Overhoren: vraag een onderdeel van het etiket aan de hand van de uitleg.
+function newLabQ(prev){const L=LABELS.find(x=>x.id===learn.lab),cand=L.parts.map((p,i)=>i).filter(i=>!/Verzonnen/.test(L.parts[i][2])&&(!prev||i!==prev.i)),i=cand[Math.floor(Math.random()*cand.length)];return {i,ask:L.parts[i][2].split(/[.:(]/)[0],good:prev?prev.good:0,msg:"",hit:null}}
+function say(t,lang){try{const u=new SpeechSynthesisUtterance(t);u.lang=lang==="la"?"it-IT":lang;u.rate=.85;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}}
+function vLearn(){
+  const subs=[["etiket","Etiket lezen"],["woorden","Woordenlijst"]];
+  let o=`<div class="row">${subs.map(s=>`<button class="chip" data-act="l-sub" data-id="${s[0]}" aria-pressed="${learn.sub===s[0]}">${s[1]}</button>`).join("")}</div>`;
+  if(learn.sub==="etiket"){const L=LABELS.find(x=>x.id===learn.lab),q=learn.q;
+    o+=`<h2>Etiket lezen</h2><div class="row">${LABELS.map(x=>`<button class="chip" data-act="l-lab" data-id="${x.id}" aria-pressed="${x.id===L.id}">${x.t}</button>`).join("")}</div>
+    <p class="small muted">${q?`<strong>Tik op: ${h(q.ask)}</strong>${q.msg?` · ${h(q.msg)}`:""} <span class="muted">(${q.good} goed)</span>`:"Tik op een onderdeel van het etiket. Producent en wijngaard zijn verzonnen."}</p>
+    ${(()=>{const bt=(p,i)=>`<button class="lp ${p[1]}${!q&&learn.part===i?" on":""}${q&&q.hit===i?" ok":""}" data-act="l-part" data-i="${i}">${h(p[0])}</button>`,I=L.parts.map((p,i)=>[p,i]);return `<div class="lab ${L.cls}">${I.filter(x=>!/mini|qr/.test(x[0][1])).map(x=>bt(...x)).join("")}<div class="minirow">${I.filter(x=>/mini|qr/.test(x[0][1])).map(x=>bt(...x)).join("")}</div></div>`})()}
+    ${!q&&learn.part!=null?(p=>`<section class="card"><h3>${h(p[0])}</h3><p>${h(p[2])}</p><p class="small muted">Bron: ${h(SRC[p[3]])}</p></section>`)(L.parts[learn.part]):""}
+    <div class="row"><button class="btn ghost" data-act="l-quiz">${q?"Stop met overhoren":"Overhoor me"}</button></div>`}
+  else{const f=learn.gl.toLowerCase(),list=GLOSS.filter(g=>!f||g[0].toLowerCase().includes(f)||g[2].toLowerCase().includes(f));
+    o+=`<h2>Woordenlijst</h2><p class="small muted">Tik op 🔊 om het woord te horen (uitspraak door de spraak van je telefoon).</p><input id="glzoek" class="search" placeholder="Zoek een term" value="${h(learn.gl)}">
+    <div class="gloss">${list.map(g=>`<div class="gl"><button class="say" data-act="l-say" data-t="${h(g[0])}" data-l="${g[1]}" aria-label="Spreek uit: ${h(g[0])}">🔊</button><div><strong>${h(g[0])}</strong><p class="small">${h(g[2])}</p><span class="src">${h(SRC[g[3]])}</span></div></div>`).join("")||"<p class='muted'>Niets gevonden.</p>"}</div>`}
+  return o}
 function vStart(){
-  const tiles=[["overhoren","Overhoren","Vragen, je fouten herhalen en een oefenexamen"],["opbouwen","Druiven","Bouw zelf een profiel en kijk het na"],["kaart","Kaart",Object.keys(GEO).join(", ")],["proeven","Proeven","Herken het glas en houd je proeflijst bij"]];
+  const tiles=[["overhoren","Overhoren","Vragen, je fouten herhalen en een oefenexamen"],["opbouwen","Druiven","Bouw zelf een profiel en kijk het na"],["kaart","Kaart",Object.keys(GEO).join(", ")],["proeven","Proeven","Herken het glas en houd je proeflijst bij"],["leren","Leren","Etiketten lezen en woordenlijst met uitspraak"]];
   const rows=[...TOPICS,{label:"Proeven",code:"6a.3"}].map(t=>{const s=store.stats[t.code]||{g:0,t:0},p=s.t?Math.round(100*s.g/s.t):0;
     return `<div class="stat"><div class="row between"><span>${t.label} <span class="pill code">${t.code}</span></span><strong>${s.t?p+"%":"nog niet geoefend"}</strong></div><div class="bar"><i style="width:${p}%"></i></div>${s.t?`<span class="muted small">${s.g} van ${s.t} goed</span>`:""}</div>`}).join("");
   const built=Object.keys(store.built),full=built.filter(n=>store.built[n]===100).length,nt=tastedCount();
@@ -953,7 +1059,7 @@ function vStart(){
     <div class="row"><button class="btn" data-act="copyflags">${copied?"Gekopieerd":"Kopieer lijst"}</button><button class="btn ghost" data-act="clearflags">Lijst legen</button></div></section>`:""}
   <section class="card"><h3>Het examen</h3><dl><dt>Vragen</dt><dd>60 meerkeuze: 54 theorie, 6 proef</dd><dt>Tijd</dt><dd>75 minuten</dd><dt>Geslaagd</dt><dd>36 van 60 goed, waarvan minstens 2 proefvragen</dd></dl>
     <p class="muted small">Aantal vragen volgens het boek. Tijd en slaaggrens volgens jedewijn.nl, nog niet bij SDEN zelf nagekeken.</p></section>
-  <p class="muted small">Komt nog: wijn maken, wet en etiket, en filmpjes.</p>
+  <p class="muted small">Komt nog: wijn maken, wet en filmpjes. Etiketten lezen staat onder Leren.</p>
   <section class="card"><h3>Instellingen</h3>
     <div class="field"><span class="small">Weergave</span><div class="row">${[["auto","Automatisch"],["light","Licht"],["dark","Donker"]].map(t=>`<button class="chip" data-act="theme" data-id="${t[0]}" aria-pressed="${(store.theme||"auto")===t[0]}">${t[1]}</button>`).join("")}</div></div>
     <div class="field"><span class="small">Back-up van je voortgang</span><p class="muted small">Je voortgang staat alleen in deze app. Met een back-up bewaar je hem als bestandje, bijvoorbeeld in je Downloads of in Google Drive, en zet je hem later of op een ander toestel weer terug.</p>
@@ -1714,7 +1820,7 @@ function hookTiles(){
 }
 
 function render(){
-  view.innerHTML=tab==="start"?vStart():tab==="overhoren"?vQuiz():tab==="opbouwen"?vBuild():tab==="kaart"?vGeo():vTaste();
+  view.innerHTML=tab==="start"?vStart():tab==="overhoren"?vQuiz():tab==="opbouwen"?vBuild():tab==="kaart"?vGeo():tab==="leren"?vLearn():vTaste();
   if(tab==="kaart"){hookTiles();hookMap()}
   if(tab==="opbouwen"||tab==="start")hookPlates();
   document.querySelectorAll("nav button").forEach(b=>{if(b.dataset.tab===tab)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});
@@ -1778,6 +1884,11 @@ view.addEventListener("click",e=>{
   else if(a==="g-plus"){zoomBy(2);return}
   else if(a==="g-minus"){zoomBy(.5);return}
   else if(a==="g-sec"){geo.sec=d.id;geo.secPick=true}
+  else if(a==="l-sub"){learn.sub=d.id}
+  else if(a==="l-lab"){learn.lab=d.id;learn.part=null;if(learn.q)learn.q=newLabQ(null)}
+  else if(a==="l-say"){say(d.t,d.l);return}
+  else if(a==="l-quiz"){learn.q=learn.q?null:newLabQ(null);learn.part=null}
+  else if(a==="l-part"){const i=+d.i,L=LABELS.find(x=>x.id===learn.lab);if(learn.q){const q=learn.q;if(i===q.i){q.good++;learn.q=newLabQ(q);learn.q.msg="Goed!";learn.q.hit=i}else{q.msg="Dat is "+L.parts[i][0]+". Nog eens.";q.hit=null}}else learn.part=learn.part===i?null:i}
   else if(a==="g-nogrape"){geo.grape=null}
   else if(a==="g-showgrape"){const g=byName(d.n),R=grapeRegs(g),ls=Object.keys(R);geo.grape=g.n;const l=R[geo.land]?geo.land:ls.sort((x,y)=>R[y].length-R[x].length)[0];if(l&&l!==geo.land){geo.land=l;geo.sel=null;geo.quiz=null;geo.sec=GEO[l].sections[0][0]}geo.c=null;tab="kaart";try{location.hash=tab}catch(e){}scroll=true}
   else if(a==="reset")confirmReset=true;
@@ -1786,6 +1897,7 @@ view.addEventListener("click",e=>{
   render();if(scroll)top();
 });
 // Back-up terugzetten uit een bestand.
+view.addEventListener("input",e=>{if(e.target.id==="glzoek"){learn.gl=e.target.value;const p=e.target.selectionStart;render();const n=document.getElementById("glzoek");if(n){n.focus();try{n.setSelectionRange(p,p)}catch(x){}}}});
 view.addEventListener("change",e=>{if(e.target.id==="grapesel"){geo.grape=e.target.value||null;if(geo.grape){const R=grapeRegs(byName(geo.grape)),ls=Object.keys(R).sort((x,y)=>R[y].length-R[x].length);if(!R[geo.land]&&ls[0]){geo.land=ls[0];geo.sel=null;geo.sec=GEO[ls[0]].sections[0][0];geo.c=null}}render();return}if(e.target.id==="climcmp"){climCmp=e.target.value;render();return}if(e.target.id!=="bkfile")return;const f=e.target.files&&e.target.files[0];if(!f)return;
   f.text().then(v=>{const o=JSON.parse(v);if(!o||typeof o!=="object"||!o.stats)throw 0;store=Object.assign(fresh(),o);save();applyTheme();bkMsg="Teruggezet uit "+f.name+". Je voortgang is weer zoals in de back-up."})
    .catch(()=>{bkMsg="Dit bestand is geen back-up van de Wijnbrevet Trainer. Kies het bestand dat begint met wijnbrevet-backup."}).finally(render)});
@@ -1794,7 +1906,7 @@ view.addEventListener("input",e=>{if(e.target.id==="zoek"){zoek=e.target.value;c
 setInterval(()=>{if(!quiz||!quiz.exam||quiz.done)return;const left=quiz.end-Date.now();if(left<=0){quiz.timeup=true;finishExam();if(tab==="overhoren"){render();top()}}else{const c=document.getElementById("clock");if(c)c.textContent=clock(left)}},1000);
 load();applyTheme();loadCellar();
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)loadCellar()});
-const start=(location.hash||"").slice(1);if(["start","overhoren","opbouwen","kaart","proeven"].includes(start))tab=start;
+const start=(location.hash||"").slice(1);if(["start","overhoren","opbouwen","kaart","proeven","leren"].includes(start))tab=start;
 render();
 }
 try{if("serviceWorker" in navigator&&location.protocol==="https:"&&/github\.io$/.test(location.hostname))navigator.serviceWorker.register("sw.js").catch(()=>{})}catch(e){}
