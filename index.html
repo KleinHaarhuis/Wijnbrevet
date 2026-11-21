@@ -1346,13 +1346,13 @@ function loadCellar(){
 const drunk=()=>cellar.filter(w=>w.list==="gedronken");
 // Proefformulier uit Mijn Wijnboek (veld proef): tekst en de belangrijkste structuurkenmerken.
 function pfOf(p){if(!p||typeof p!=="object")return null;const A=[...(Array.isArray(p.aroma)?p.aroma:[]),...String(p.aromaEigen||"").split(",").map(x=>x.trim()).filter(Boolean)].map(String);
-  const k=x=>typeof x==="string"?x:"";const r={t:k(p.tekst),datum:k(p.datum),kleur:k(p.kleur),ar:A,zoet:k(p.zoet),zuur:k(p.zuur)+(p.zuurst?" ("+k(p.zuurst)+")":""),tan:k(p.tan),alc:k(p.alc),mond:k(p.mond),afdr:k(p.afdr),ontw:k(p.ontw),oordeel:k(p.oordeel)};
+  const k=x=>typeof x==="string"?x:"";const r={t:k(p.tekst),datum:k(p.datum),kleur:k(p.kleur),ar:A,zoet:k(p.zoet),zuur:k(p.zuur)+(p.zuurst?" ("+k(p.zuurst)+")":""),tan:k(p.tan)+(Array.isArray(p.tanaard)&&p.tanaard.length?" ("+p.tanaard.join(", ")+")":""),alc:k(p.alc),body:k(p.body),mond:Array.isArray(p.mond)?p.mond.join(", "):k(p.mond),afdr:k(p.afdr),ontw:k(p.ontw),oordeel:k(p.oordeel)};
   return r.t||A.length||r.kleur||r.zuur?r:null}
 function pfCard(){
   const W=drunk().filter(w=>w.pf);if(!cellar.length)return "";
   const names=LIST.flatMap(g=>g[1]),exOf=w=>names.filter((n,i)=>proefMatch(i).some(x=>x.id===w.id));
   return `<section class="card"><div class="row between"><h2>Mijn proefformulieren</h2><span class="muted small">${W.length}</span></div>
-    ${W.length?W.slice(0,8).map(w=>{const p=w.pf,ex=exOf(w),S=[["Kleur",p.kleur],["Aroma's",p.ar.join(", ")],["Zoet",p.zoet],["Zuur",p.zuur],["Tannine",p.tan],["Alcohol",p.alc],["Mondgevoel",p.mond],["Afdronk",p.afdr],["Ontwikkeling",p.ontw],["Oordeel",p.oordeel]].filter(x=>x[1]&&x[1].trim());
+    ${W.length?W.slice(0,8).map(w=>{const p=w.pf,ex=exOf(w),S=[["Kleur",p.kleur],["Aroma's",p.ar.join(", ")],["Zoet",p.zoet],["Zuur",p.zuur],["Tannine",p.tan],["Alcohol",p.alc],["Body",p.body],["Mondgevoel",p.mond],["Afdronk",p.afdr],["Ontwikkeling",p.ontw],["Oordeel",p.oordeel]].filter(x=>x[1]&&x[1].trim());
       return `<details class="pfw"><summary><strong>${h(w.n)}</strong> <span class="small muted">${h([w.jaar,p.datum&&new Date(p.datum).toLocaleDateString("nl-NL",{day:"numeric",month:"short"})].filter(Boolean).join(" · "))}</span>${ex.length?`<br><span class="small">Examenwijn: ${h(ex.slice(0,2).join("; "))}</span>`:""}</summary>
         ${p.t?`<p>${h(p.t)}</p>`:""}${S.length?`<dl>${S.map(x=>`<dt>${x[0]}</dt><dd>${h(x[1])}</dd>`).join("")}</dl>`:""}</details>`}).join("")+(W.length>8?`<p class="small muted">En nog ${W.length-8} in Mijn Wijnboek.</p>`:"")
     :`<p class="muted small">Vul in Mijn Wijnboek bij een gedronken wijn het proefformulier in; je ziet het dan hier terug, met de examenwijn waar hij bij hoort.</p>`}
