@@ -196,7 +196,7 @@ textarea{width:100%;min-height:110px;font:inherit;font-size:.82rem;color:var(--i
 .lab{border-radius:6px;padding:18px 14px 14px;margin:.6rem 0;display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:0 2px 10px rgba(0,0,0,.12);text-align:center}
 .lab-fr{background:#f7f1e3;color:#3a2a1c;font-family:Fraunces,Georgia,serif;border:3px double #8a6d3b}
 .lab-de{background:#fdfcf8;color:#1f2a24;border-top:10px solid #7b1e2e}
-.lab-at{background:#eef2e8;color:#1f2a1f;border:1px solid #6b7c55}
+.lab-at{background:#eef2e8;color:#1f2a1f;border:1px solid #6b7c55}.lab-hu{background:#f8efd9;color:#3b2a12;font-family:Fraunces,Georgia,serif;border:2px solid #b3913f;border-radius:14px}.lab-gr{background:#f4f7fb;color:#13304f;border-left:10px solid #2a5d93}.lab-gr .lp-small{text-transform:none;letter-spacing:.02em}.lab-lu{background:#fbf8f2;color:#2b2420;border:1px solid #2b2420;outline:3px solid #fbf8f2;outline-offset:-7px}.lab-nl{background:#f3f6ef;color:#203020;border-bottom:8px solid #e07a2f}
 .lp{background:none;border:1px dashed transparent;border-radius:4px;color:inherit;font:inherit;padding:2px 6px;cursor:pointer;line-height:1.2}
 .lp:hover,.lp.on{border-color:var(--rose);background:rgba(168,104,123,.12)}.lp.ok{border-color:var(--accent);background:rgba(107,143,113,.18)}
 .lp-prod{font-size:1.25rem;font-style:italic;margin-bottom:6px}.lp-big{font-size:1.15rem;font-weight:600;letter-spacing:.02em}.lp-mid{font-size:1rem}.lp-small{font-size:.8rem;text-transform:uppercase;letter-spacing:.06em}.lp-mini{font-size:.72rem;display:inline-block}.lp-qr{font-size:.7rem;border:1px solid currentColor;padding:6px}
@@ -1015,7 +1015,7 @@ function searchHits(term){
 const hitsHTML=term=>{const H=searchHits(term);return H.length?H.map(x=>x[0]?`<button class="hit2" data-act="${x[0]}" data-n="${h(x[1])}"><strong>${h(x[2])}</strong><span>${h(x[3])}</span></button>`:`<div class="hit2"><strong>${h(x[2])}</strong><span>${h(x[3])}</span></div>`).join(""):term.trim().length>1?`<p class="muted small">Niets gevonden.</p>`:""};
 /* ---------- Leren: etiketten lezen en woordenlijst ---------- */
 // Voorbeeldetiketten met verzonnen producenten. Per onderdeel: [tekst, stijlklasse, uitleg, bron].
-const SRC={eu:"EU-verordening 2019/33 en 1308/2013",dwi:"Deutsches Weininstitut",boek:"boek",ak:"algemene kennis, niet uit het boek"};
+const SRC={eu:"EU-verordening 2019/33 en 1308/2013",hu:"Hongaarse wijnwet over Tokaj (via FAOLEX)",aop:"AOP Moselle Luxembourgeoise (aop.public.lu)",rvo:"RVO, regels voor het wijnetiket",dwi:"Deutsches Weininstitut",boek:"boek",ak:"algemene kennis, niet uit het boek"};
 const LABELS=[
 {id:"fr",t:"Frankrijk",cls:"lab-fr",parts:[
 ["Domaine des Tilleuls","lp-prod","Naam van het wijnhuis. Een domaine (of château in Bordeaux) heeft eigen wijngaarden. Verzonnen naam.","ak"],
@@ -1051,7 +1051,52 @@ const LABELS=[
 ["trocken","lp-small","Smaakaanduiding: droog.","ak"],
 ["13,5 % vol","lp-mini","Alcoholpercentage.","eu"],
 ["0,75 l","lp-mini","Nominale inhoud.","eu"],
-["Enthält Sulfite","lp-mini","Allergeen; moet altijd op het etiket.","eu"]]}];
+["Enthält Sulfite","lp-mini","Allergeen; moet altijd op het etiket.","eu"]]},
+{id:"hu",t:"Hongarije",cls:"lab-hu",parts:[
+["Kővölgy Pincészet","lp-prod","Naam van het wijnhuis; pincészet betekent wijnkelder of wijnhuis. Verzonnen naam.","ak"],
+["Tokaji Aszú","lp-big","Zoete wijn (aszú) uit de streek Tokaj, van druiven met edele rotting die een voor een met de hand worden geplukt. Ze trekken een paar dagen in gistende most van gewone druiven, worden geperst en vergisten opnieuw.","boek"],
+["5 puttonyos","lp-big","Het aantal emmertjes (puttonyos). Vroeger werd zo de hoeveelheid edelgerotte druiven gemeten. Hoe meer emmertjes, hoe zoeter en beter de wijn. De emmertjes zijn verdwenen, de term wordt nog gebruikt. Van internet, niet uit het boek: de Hongaarse wijnwet kent nu alleen nog 5 puttonyos (minstens 120 g/l suiker) en 6 puttonyos (minstens 150 g/l); 3 en 4 zijn in 2013 geschrapt.","hu"],
+["2019","lp-mid","Oogstjaar (évjárat).","ak"],
+["Oltalom alatt álló eredetmegjelölés","lp-small","Hongaars voor beschermde oorsprongsbenaming (BOB/AOP).","eu"],
+["édes","lp-small","Smaakaanduiding: zoet.","ak"],
+["Termelői palackozás","lp-small","Gebotteld door de producent zelf. (De bottelaar vermelden is verplicht.)","eu"],
+["11 % vol","lp-mini","Alcoholpercentage. Tokaji Aszú heeft door de vele suiker vaak weinig alcohol.","eu"],
+["500 ml","lp-mini","Nominale inhoud. Tokaji Aszú zit traditioneel in een fles van een halve liter (algemene kennis).","eu"],
+["Szulfitokat tartalmaz","lp-mini","Bevat sulfieten: allergeen, moet altijd op het etiket.","eu"],
+["Magyar bor","lp-mini","Hongaarse wijn: het land van herkomst. Verplicht.","eu"]]},
+{id:"gr",t:"Griekenland",cls:"lab-gr",parts:[
+["Κτήμα Ανεμόμυλος","lp-prod","Ktima Anemomylos: ktima betekent landgoed, anemomylos windmolen. Verzonnen naam.","ak"],
+["Σαντορίνη · Santorini","lp-big","De herkomst: het winderige vulkaaneiland met de zwarte bodem. De witte Santorini is misschien wel de meest intrigerende Griekse wijn.","boek"],
+["Προστατευόμενη Ονομασία Προέλευσης","lp-small","Grieks voor beschermde oorsprongsbenaming (BOB/AOP). Uitspraak ongeveer: prostatevomeni onomasia proelefsis, afgekort ΠΟΠ.","eu"],
+["Ασύρτικο · Assyrtiko","lp-mid","De druif. Assyrtiko groeit op Santorini heel laag bij de grond en geeft een uitgesproken minerale smaak. Van internet, niet uit het boek: de stokken worden als manden (kouloura) gevlochten, tegen wind en zon.","boek"],
+["2023","lp-mid","Oogstjaar.","ak"],
+["Ξηρός λευκός οίνος","lp-small","Droge witte wijn. Uitspraak ongeveer: xiros lefkos oinos.","ak"],
+["Εμφιαλώθηκε στο κτήμα","lp-small","Gebotteld op het landgoed. (De bottelaar vermelden is verplicht.)","eu"],
+["13,5 % vol","lp-mini","Alcoholpercentage.","eu"],
+["750 ml","lp-mini","Nominale inhoud.","eu"],
+["Περιέχει θειώδη","lp-mini","Bevat sulfieten: allergeen, moet altijd op het etiket.","eu"],
+["Προϊόν Ελλάδας","lp-mini","Product van Griekenland: het land van herkomst. Verplicht.","eu"]]},
+{id:"lu",t:"Luxemburg",cls:"lab-lu",parts:[
+["Domaine Kalkbierg","lp-prod","Naam van het wijnhuis. Verzonnen naam.","ak"],
+["Crémant de Luxembourg","lp-big","Mousserende wijn waarvoor de tweede vergisting op de fles verplicht is (traditionele methode). Luxemburg staat bekend om mousserende wijn. Andere Luxemburgse mousserende wijnen mogen ook met de tankmethode worden gemaakt.","boek"],
+["Moselle Luxembourgeoise – Appellation d'origine protégée","lp-small","De enige herkomstaanduiding van Luxemburg: alle wijnen vallen onder de AOP Moselle Luxembourgeoise. Het boek noemt ook de Marque Nationale, met Vin Classé, Premier Cru en Grand Premier Cru, toegekend op punten na een keuring. Van internet, niet uit het boek: sinds 2015 rust de AOP op herkomst in plaats van op de keuring in het glas, met de herkomstvermeldingen Côtes de, Coteaux de en Lieu-dit. De termen Vin classé, Premier cru en Grand premier cru mogen nog wel.","aop"],
+["Brut","lp-mid","Smaakaanduiding voor mousserende wijn: droog.","eu"],
+["Riesling · Pinot Blanc · Auxerrois","lp-small","De druiven. In Luxemburg worden vooral witte druiven verbouwd: elbling, rivaner (müller-thurgau), auxerrois, pinot gris en riesling.","boek"],
+["12 % vol","lp-mini","Alcoholpercentage.","eu"],
+["75 cl","lp-mini","Nominale inhoud.","eu"],
+["Contient des sulfites","lp-mini","Bevat sulfieten: allergeen, moet altijd op het etiket.","eu"],
+["Produit du Luxembourg","lp-mini","Het land van herkomst. Verplicht.","eu"]]},
+{id:"nl",t:"Nederland",cls:"lab-nl",parts:[
+["Wijngaard De Zandhoef","lp-prod","Naam van de wijngaard. Verzonnen naam.","ak"],
+["Johanniter","lp-big","De druif: een witte kruising die resistenter is tegen schimmel en rot en de kou beter verdraagt. Buiten Limburg werkt men in Nederland vooral met zulke kruisingen.","boek"],
+["Achterhoek","lp-mid","Een kleinere gebiedsnaam binnen het gebied van de BGA. Van internet, niet uit het boek: dat mag op het etiket bij de BGA worden gezet.","rvo"],
+["Beschermde Geografische Aanduiding Gelderland","lp-small","De beschermde geografische aanduiding van een provincie. Elke Nederlandse provincie heeft er een. Van internet, niet uit het boek: RVO schrijft voor om de naam altijd voluit te schrijven, dus niet afgekort tot BGA (of BOB bij een Beschermde Oorsprongsbenaming).","rvo"],
+["2024","lp-mid","Oogstjaar.","ak"],
+["droog","lp-small","Smaakaanduiding.","eu"],
+["11,5 % vol","lp-mini","Alcoholpercentage. Door het korte groeiseizoen is in Nederland vaak chaptalisatie nodig.","boek"],
+["75 cl","lp-mini","Nominale inhoud.","eu"],
+["Bevat sulfieten","lp-mini","Allergeen; moet altijd op het etiket.","eu"],
+["Product van Nederland","lp-mini","Het land van herkomst. Verplicht.","eu"]]}];
 // Woordenlijst: [term, taal voor uitspraak, uitleg, bron]
 const GLOSS=[
 ["Appellation d'Origine Contrôlée","fr-FR","AOC/AOP: beschermde herkomstbenaming met regels voor gebied, druiven en opbrengst.","boek"],
