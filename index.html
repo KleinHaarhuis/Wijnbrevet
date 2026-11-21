@@ -493,10 +493,87 @@ const FRQ=[
 ["Wat betekent Millésimé op een champagne?","Van één oogstjaar",["Van één wijngaard","Zonder toegevoegde suiker"],"De meeste champagne is een assemblage van meerdere jaren."],
 ["Hoeveel gemeenten in Champagne zijn Grand Cru?","17",["54","33"],"In Champagne geldt Grand Cru voor gemeenten."]
 ].map(t=>[t[0],t[1],t[2],t[3],"76-123",/druif|druiven/.test(t[0])?"1.3":/Wat is |Wat zijn |betekent|Hoe ontstaat|suiker|flesvorm|pyramide|classificatie/.test(t[0])?"5a.3":"4.3"]);
-const CQ={duitsland:[()=>DEQ,"de"],oostenrijk:[()=>ATQ,"at"],frankrijk:[()=>FRQ,"fr"]};
+// Hongarije, Balkanlanden en Griekenland, boek p. 170-173.
+const OEQ=[
+["Sinds wanneer kwamen de Hongaarse wijnbouwers weer in contact met de rest van de wijnwereld?","Sinds 1989, toen het IJzeren Gordijn verdween",["Sinds 1945, na de oorlog","Sinds 2004, bij de toetreding tot de EU"],"Hongarije heeft een lange wijntraditie maar is in veel opzichten een jong wijnland. Vernieuwingen waren hard nodig, maar de basis was er.",170,"4.3"],
+["Welk klimaat heeft Hongarije?","Landklimaat met warme zomers en koude winters",["Mediterraan klimaat","Zeeklimaat met zachte winters"],"Bij het Balatonmeer en in het zuiden zijn de winters minder koud.",170,"4.3"],
+["Waarom zijn de omstandigheden in Tokaj zo goed voor botrytis cinerea?","De herfst is doorgaans lang en warm",["Er staat altijd een harde, droge wind","De zomers zijn er koel en nat"],"Botrytis cinerea is de edele rotting die nodig is voor Tokaji Aszú.",170,"4.3"],
+["Wat zijn de bekendste witte druiven van Hongarije?","Furmint en hárslevelű",["Graševina en rebula","Feteasca alba en assyrtiko"],"Ze geven droge, geurige witte wijnen en ook Tokaji Aszú.",170,"1.3"],
+["Wat is het belangrijkste druivenras voor rode wijn in Hongarije?","Kékfrankos (blaufränkisch)",["Plavac mali","Xynomavro"],"Goede rode wijnen komen uit Sopron, Eger en Villány.",170,"1.3"],
+["Uit welke Hongaarse gebieden komen volgens het boek goede rode wijnen?","Sopron, Eger en Villány",["Tokaj, Sopron en Balaton","Goriška Brda, Podravje en Tokaj"],"Kékfrankos (blaufränkisch) is daar het belangrijkste rode ras.",170,"4.3"],
+["Wat betekent aszú in Tokaji Aszú?","Zoete wijn",["Emmertje","Edele rotting"],"Tokaji Aszú is een zoete wijn uit de streek Tokaj, in het noordoosten van Hongarije.",170,"4.3"],
+["Hoe worden de edelgerotte druiven voor Tokaji Aszú geoogst?","Een voor een met de hand geplukt",["Machinaal in één keer","In hele trossen na de eerste vorst"],"Daarna gaan ze bij de gistende most van gewone druiven.",170,"4.3"],
+["Hoe wordt Tokaji Aszú gemaakt?","Edelgerotte druiven trekken een paar dagen in gistende most van gewone druiven, worden geperst en vergisten opnieuw",["De druiven worden in de zon gedroogd en daarna versterkt met alcohol","De most wordt ingevroren tot de suiker geconcentreerd is"],"In enkele dagen zuigen de verschrompelde druifjes zich vol met verse wijn. Daarna worden ze geperst en begint de vergisting opnieuw.",170,"4.3"],
+["Wat betekent puttonyos?","Emmertje",["Edele rotting","Zoete wijn"],"Vroeger werd in zo'n emmertje de hoeveelheid edelgerotte druiven gemeten. Hoe meer emmertjes, hoe zoeter en beter de wijn. De emmertjes zijn verdwenen, de term wordt nog gebruikt.",170,"5a.3"],
+["Wat zegt het aantal puttonyos over een Tokaji Aszú?","Hoe meer puttonyos, hoe zoeter de wijn",["Hoe meer puttonyos, hoe ouder de wijn","Hoe meer puttonyos, hoe hoger het alcoholpercentage"],"Hoe meer edelgerotte druiven erbij gaan, des te zoeter wordt de wijn.",170,"5a.3"],
+["Hoe is de verdeling wit/rood in Kroatië?","Twee derde wit, een derde rood",["Twee derde rood, een derde wit","Bijna alleen wit"],"66% wit en 34% rood, op 33.000 ha.",170,"4.3"],
+["Welk klimaat heeft Kroatië aan de Adriatische Zee?","Mediterraan",["Landklimaat","Alpenklimaat"],"In het noorden is er invloed van de Alpen en is het beduidend koeler; in het binnenland heerst een landklimaat.",170,"4.3"],
+["Wat is een bekende Kroatische blauwe druif?","Plavac mali",["Kékfrankos","Mavrud"],"Voor witte wijnen worden onder meer graševina (welschriesling), riesling en sauvignon blanc gebruikt.",170,"1.3"],
+["Welke andere naam noemt het boek voor graševina?","Welschriesling",["Furmint","Feteasca alba"],"Graševina is een belangrijke witte druif van Kroatië.",170,"1.3"],
+["Aan welke landen grenst Slovenië volgens het boek in het westen en noorden?","Italië (Friuli) en Oostenrijk",["Hongarije en Kroatië","Duitsland en Zwitserland"],"De Sloveense wijnen lijken op die van de aangrenzende landen.",170,"4.3"],
+["Hoeveel van de Sloveense productie is wit?","Drie kwart",["De helft","Een derde"],"75% wit, op 22.000 ha.",170,"4.3"],
+["Wat is het bekendste wijngebied in het westen van Slovenië?","Goriška Brda",["Podravje","Tokaj"],"Specialiteiten: wit van rebula en rood van merlot en cabernet.",170,"4.3"],
+["Welk Sloveens gebied grenst aan de Oostenrijkse Steiermark?","Podravje",["Goriška Brda","Transsylvanië"],"Uit deze tamelijk koele omgeving komen droge, frisse witte wijnen van aromatische rassen als šipon en sauvignon blanc.",170,"4.3"],
+["Welke druif heet in Slovenië šipon?","Furmint",["Welschriesling","Rebula"],"Šipon geeft in Podravje droge, frisse, aromatische witte wijnen.",170,"1.3"],
+["Wanneer begon de moderne wijnbouw in Bulgarije?","Rond 1920",["Rond 1989","Rond 1800"],"Wijnbouw vond er al 3000 jaar geleden plaats.",171,"4.3"],
+["Waar richtte Bulgarije zich zelfs onder het communisme op?","Op de smaak en ontwikkelingen in West-Europa",["Op zoete wijn voor de Sovjet-Unie","Op uitsluitend inheemse druiven"],"Er werden internationale rassen als chardonnay, cabernet sauvignon en merlot aangeplant.",171,"4.3"],
+["Waar liggen de meeste Bulgaarse wijngaarden?","In de Donauvlakte in het noorden en in de regio aan de Zwarte Zee",["In het bergland rond Sofia","Langs de grens met Griekenland"],"Wijnbouw is in Bulgarije nagenoeg overal mogelijk.",171,"4.3"],
+["Wat zijn typisch Bulgaarse druiven?","Mavrud en melnik",["Feteasca neagra en babeasca neagra","Agiorgitiko en xynomavro"],"Ze geven robuuste rode wijnen. Bulgarije maakt 60% rode wijn.",171,"1.3"],
+["Hoe groot is Roemenië als wijnland?","Het vijfde van Europa, ongeveer even groot als Portugal",["Het kleinste van de Balkan","Het grootste van Europa"],"Roemenië heeft zo'n 192.000 ha wijngaard.",171,"4.3"],
+["Wat is het bekendste wijngebied van Roemenië?","Transsylvanië",["De Donauvlakte","Tokaj"],"In het koele Transsylvanië worden vooral frisse, aromatische witte wijnen gemaakt.",171,"4.3"],
+["Welke inheemse witte druif noemt het boek voor Roemenië?","Feteasca alba",["Hárslevelű","Moschofilero"],"Blauwe inheemse rassen zijn babeasca neagra en feteasca neagra.",171,"1.3"],
+["Welke internationale druif doet het volgens het boek erg goed in Roemenië?","Pinot noir",["Zinfandel","Grenache"],"Naast inheemse rassen worden in Roemenië veel internationale druiven geteeld.",171,"1.3"],
+["Welke bodems heeft Roemenië?","Een enorme variatie, van leisteen tot kalkrijke klei",["Vooral vulkanische bodems","Vooral zand en grind"],"Het landschap is bergachtig; over het geheel heerst een landklimaat.",171,"4.3"],
+["Wat is het oudste wijnland van Europa?","Griekenland",["Italië","Bulgarije"],"Griekenland (Hellas) heeft een wijnbouwgeschiedenis van meer dan 3000 jaar.",172,"4.3"],
+["Hoe groot is de Griekse wijngaard?","105.000 ha, ongeveer even groot als Duitsland",["10.500 ha, zo groot als Oostenrijk","1 miljoen ha, de grootste van Europa"],"Daarmee hoort Griekenland bij de middelgrote wijnlanden.",172,"4.3"],
+["Welke twee Griekse wijnen zijn internationaal bekend?","Retsina en zoete muskaatwijnen",["Tokaji en retsina","Náoussa en Sámos Nectar"],"Het boek noemt retsina een 'dubieuze harswijn' en de muskaatwijnen 'verrukkelijk'.",172,"4.3"],
+["Waar liggen de beste Griekse wijngaarden?","Op koele hoogte",["In de laaggelegen kustzones","Op de vlakten rond Athene"],"In de laaggelegen kustzones kan het erg warm worden.",172,"4.3"],
+["Welk klimaat heeft het bergachtige noorden van Griekenland?","Continentaal Balkanklimaat met koude winters",["Mediterraan","Zeeklimaat"],"In het grootste deel van Griekenland heerst een mediterraan klimaat.",172,"4.3"],
+["Waarin ligt de grote kracht van de Griekse wijn?","De authenticiteit, dankzij eigen druivenrassen",["De lage prijs van internationale rassen","De grote hoeveelheid versterkte wijn"],"De inheemse rassen zijn bestand tegen warmte en droogte. Internationale rassen hebben weinig succes.",172,"4.3"],
+["Met welk land vergelijkt het boek Griekenland, omdat het veel wijn van één druif maakt?","Portugal",["Frankrijk","Australië"],"Ook Portugal heeft veel eigen druivenrassen.",172,"4.3"],
+["Welke twee blauwe Griekse druiven noemt het boek?","Agiorgitiko en xynomavro",["Assyrtiko en moschofilero","Mavrud en melnik"],"Wit: assyrtiko en moschofilero.",172,"1.3"],
+["Welke twee witte Griekse druiven noemt het boek?","Assyrtiko en moschofilero",["Agiorgitiko en xynomavro","Furmint en rebula"],"Griekenland maakt zo'n 70% witte wijn.",172,"1.3"],
+["Van welke druif zijn de houtgerijpte rode wijnen van Náoussa?","Xynomavro",["Agiorgitiko","Assyrtiko"],"Ze hebben de nodige tannine en zuren en worden weleens vergeleken met nebbiolo uit Piemonte.",173,"1.3"],
+["Met welke wijnen wordt Náoussa weleens vergeleken?","Nebbiolo uit Piemonte",["Pinot noir uit Bourgogne","Syrah uit de Rhône"],"Houtgerijpte xynomavro met de nodige tannine en zuren.",173,"4.3"],
+["Waar liggen de wijngaarden van Náoussa?","Op hellingen van 200 tot 500 meter in Macedonië, met kalkrijke kleibodems",["Op zwarte vulkaanbodem op een eiland","Op de vlakte van de Peloponnesos"],"De lichtere rode wijnen komen van wijngaarden met een zanderige bodem.",173,"4.3"],
+["Welke druif hoort bij Neméa?","Agiorgitiko",["Xynomavro","Muscat"],"Neméa ligt op de Peloponnesos.",173,"4.3"],
+["Op welke twee manieren wordt Neméa gemaakt?","Krachtig en vol, en licht en fruitig als primeur met macération semi-carbonique",["Droog wit en zoet wit","Versterkt en onversterkt"],"De traditionele stijl is krachtig en vol.",173,"4.3"],
+["Waarin is het eiland Sámos gespecialiseerd?","Rijke zoete wijnen van muscat, in de stijl van vin doux naturel",["Droge witte wijn van assyrtiko","Houtgerijpte rode wijn"],"Sámos ligt vlak voor de kust van Turkije.",173,"4.3"],
+["Hoe wordt Sámos Nectar gemaakt?","Onversterkt; de druiven worden eerst in de zon gedroogd",["Versterkt met alcohol, zoals een vin doux naturel","Van bevroren druiven"],"Sámos Nectar is een onversterkte zoete wijn.",173,"4.3"],
+["Waarom is de witte wijn van Santorini zo bijzonder?","Assyrtiko op een winderig vulkaaneiland met zwarte bodem, heel laag bij de grond",["Moschofilero op kalkrijke klei","Muscat die in de zon wordt gedroogd"],"De wijn heeft een uitgesproken minerale smaak.",173,"4.3"]
+];
+// Nederland, België en Luxemburg, boek p. 174-175.
+const BXQ=[
+["Wanneer en waar begon de moderne wijnbouw in Nederland?","Rond 1975 in Zuid-Limburg",["Rond 1950 in Zeeland","Rond 2000 in Gelderland"],"Sindsdien is de wijnbouw over bijna het hele land verspreid geraakt.",174,"4.3"],
+["Welke provincie heeft de grootste aanplant in Nederland?","Limburg",["Gelderland","Zeeland"],"Daar ligt ook de oudste BOB: Maasvallei Limburg.",174,"4.3"],
+["Hoeveel BOB's telde Nederland in 2024?","9",["3","25"],"De BOB Maasvallei Limburg is de oudste.",174,"5a.3"],
+["Wat is de oudste Nederlandse BOB?","Maasvallei Limburg",["Zuid-Limburg","Achterhoek"],"Deze BOB is grensoverschrijdend: ook Belgisch Limburg hoort erbij.",174,"5a.3"],
+["Waarom lukken klassieke druivenrassen in Nederland bijna alleen in Zuid-Limburg?","De rest van het land is te koel en vochtig",["Elders is de bodem te kalkrijk","Elders is het te droog"],"Rondom Maastricht is het heuvelachtig, met zuidhellingen langs riviertjes, beschermd tegen koude wind.",174,"4.3"],
+["Welke bodem heeft Zuid-Limburg?","Kalkrijke mergel en löss met een goede drainage",["Leisteen en graniet","Vulkanisch gesteente"],"De wijngaarden liggen op zuidelijke hellingen.",174,"4.3"],
+["Waarom werkt men buiten Limburg met speciale kruisingen?","Ze zijn resistenter tegen schimmel en rot en verdragen de kou beter",["Ze geven meer alcohol","Ze hebben minder water nodig"],"Voorbeelden: wit johanniter, solaris en riesel; blauw regent, cabernet cortis en pinotin.",174,"1.3"],
+["Welke druiven zijn witte kruisingen die in Nederland worden gebruikt?","Johanniter, solaris en riesel",["Regent, cabernet cortis en pinotin","Riesling, auxerrois en pinot gris"],"Regent, cabernet cortis en pinotin zijn blauwe kruisingen.",174,"1.3"],
+["Waarom is chaptalisatie in Nederland vaak nodig?","Door het korte groeiseizoen",["Door de hoge zuren van de bodem","Omdat de wet het verplicht"],"Bij chaptalisatie wordt suiker aan de most toegevoegd voor een hoger alcoholgehalte.",174,"4.3"],
+["Hoeveel wijngaard heeft Nederland ongeveer?","325 ha",["3.250 ha","32 ha"],"Goed voor circa 11.000 hectoliter per jaar.",174,"4.3"],
+["Wat is het kleinste wijnland van de Benelux?","België",["Nederland","Luxemburg"],"België heeft zo'n 200 ha wijngaard en maakt 7000 hectoliter per jaar.",175,"4.3"],
+["Hoeveel officiële BOB's heeft België?","7",["3","9"],"Hageland, Haspengouw, Heuvelland, Maasvallei Limburg, Côtes de Sambre et Meuse en 2 voor mousserende wijn.",175,"5a.3"],
+["Welke Belgische BOB ligt in Wallonië?","Côtes de Sambre et Meuse",["Hageland","Heuvelland"],"Hageland, Haspengouw, Heuvelland en Maasvallei Limburg liggen in Vlaanderen.",175,"5a.3"],
+["Wat is tegenwoordig de belangrijkste druif van België?","Chardonnay",["Regent","Solaris"],"Anders dan in Nederland bestaat de aanplant vooral uit edele druivenrassen als müller-thurgau, pinot blanc, pinot gris en chardonnay.",175,"1.3"],
+["Wat is een Belgische specialiteit?","Mousserende wijn volgens de traditionele methode",["Zoete wijn van edelgerotte druiven","Versterkte wijn"],"België maakt vooral wit en mousserend.",175,"4.3"],
+["Wat is het grootste wijnland van de Benelux?","Luxemburg",["Nederland","België"],"Met ongeveer 1200 ha wijngaard en een eeuwenlange wijnbouwtraditie.",175,"4.3"],
+["Waar liggen de Luxemburgse wijngaarden?","In een lint langs de linkeroever van de Moezel",["Langs de Maas","In de Ardennen"],"Het klimaat is er koeler en de hellingen zijn minder steil dan in de Duitse Mosel.",175,"4.3"],
+["Waarom hebben de druiven in Luxemburg soms moeite om te rijpen?","Het is er koeler en de hellingen zijn minder steil dan in de Duitse Mosel",["Er valt te weinig regen","De bodem is te vruchtbaar"],"Er worden vooral witte druivenrassen verbouwd.",175,"4.3"],
+["Welke naam gebruikt Luxemburg voor müller-thurgau?","Rivaner",["Elbling","Auxerrois"],"Elbling, rivaner, auxerrois, pinot gris en riesling komen het meest voor.",175,"1.3"],
+["Waarvoor wordt elbling in Luxemburg vooral gebruikt?","Voor mousserende wijn",["Voor zoete wijn","Voor rode wijn"],"Luxemburg staat bekend om mousserende wijn.",175,"1.3"],
+["Hoeveel herkomstaanduidingen heeft Luxemburg?","Eén: AOP Moselle Luxembourgeoise",["Drie: Vin Classé, Premier Cru en Grand Premier Cru","Negen, net als Nederland"],"Alle Luxemburgse wijnen vallen onder de AOP Moselle Luxembourgeoise.",175,"5a.3"],
+["Wat is de Marque Nationale?","Een erkenning van kwaliteit met 3 niveaus",["De naam van de enige Luxemburgse AOP","Een wijngaardclassificatie zoals in Bourgogne"],"De niveaus zijn Vin Classé, Premier Cru en Grand Premier Cru.",175,"5a.3"],
+["Wat is het hoogste niveau van de Marque Nationale?","Grand Premier Cru",["Premier Cru","Vin Classé"],"Daaronder Premier Cru, en dan Vin Classé.",175,"5a.3"],
+["Waarop is de Luxemburgse Marque Nationale gebaseerd?","Op punten die na een keuring aan de wijn worden toegekend",["Op de ligging van de wijngaard","Op de leeftijd van de wijnstokken"],"De classificatie is dus niet gebaseerd op wijngaarden.",175,"5a.3"],
+["Wat is verplicht voor Crémant de Luxembourg?","De tweede vergisting op de fles",["Rijping op eikenhouten vaten","Minstens 50% elbling"],"Andere Luxemburgse mousserende wijnen worden volgens de tankmethode of de traditionele methode gemaakt.",175,"5a.3"]
+];
+const CQ={duitsland:[()=>DEQ,"de"],oostenrijk:[()=>ATQ,"at"],frankrijk:[()=>FRQ,"fr"],oosteuropa:[()=>OEQ,"oe"],benelux:[()=>BXQ,"bx"]};
 function cQ(topic){const [L,p]=CQ[topic],t=wpick(L(),t=>p+":"+t[0]),q=mk(t[5],topic,p+":"+t[0],t[0],t[1],t[2],t[3]);if(q)q.src="Boek p. "+t[4];return q}
 function deQ(){return cQ("duitsland")}
-const QUIZ_TOPICS=[...TOPICS,{id:"duitsland",label:"Duitsland"},{id:"oostenrijk",label:"Oostenrijk en Zwitserland"},{id:"frankrijk",label:"Frankrijk"}];
+const QUIZ_TOPICS=[...TOPICS,{id:"duitsland",label:"Duitsland"},{id:"oostenrijk",label:"Oostenrijk en Zwitserland"},{id:"frankrijk",label:"Frankrijk"},{id:"oosteuropa",label:"Hongarije, Balkan en Griekenland"},{id:"benelux",label:"Nederland, België en Luxemburg"}];
 const LATER=["Wijnbouw (2a–2c)","Wijnbereiding (3a–3b)","Alcohol en wet (5b)","Omgaan met wijn (6b)"];
 
 /* ---------- Hulpjes ---------- */
@@ -1404,6 +1481,74 @@ Frankrijk:{title:"Frankrijk",box:[41.35,-2.2,49.5,9.6],zdeep:7,quizTop:true,gren
     {n:"Pouilly-Fumé",parent:"Loire",zl:9.5,druif:"sauvignon blanc",kleur:"wit",stijl:"droog, fris, fruitig; iets ronder en fruitiger dan Sancerre",info:"De andere topappellation van Centre-Loire, bijna tegenover Sancerre op de rechteroever. Pouilly-Fumé is de naam van de wijn; de stad heet Pouilly-sur-Loire. Beste hellingen op het westen, voor de middag- en avondzon."},
     {n:"Menetou-Salon",parent:"Loire",zl:9.5,druif:"sauvignon blanc; pinot noir",kleur:"wit, rosé en rood",stijl:"droog, fris, wat lichter dan goede Sancerre; rood licht, fris, fruitig",info:"Vlakker, en verder van de Loire dan Sancerre en Pouilly. Kalkrijke bodem."}
   ]
+},
+"Hongarije en Balkan":{title:"Hongarije en de Balkan",box:[41.2,13.3,48.7,29.9],grens:"De gebieden zijn met de hand ingetekend en dus bij benadering.",
+  src:"Bron: boek p. 170-171. Het boek noemt in Kroatië geen gebieden bij naam; de indeling kust en binnenland volgt de klimaattekst. Wat als algemene kennis is gemarkeerd, komt niet uit het boek.",
+  regions:[
+    {n:"Tokaj",druif:"furmint, hárslevelű",kleur:"zoet en droog wit",stijl:"Tokaji Aszú: wereldberoemde zoete, edelgerotte wijn",poly:[[48.45,21.10],[48.45,21.60],[48.25,21.75],[48.05,21.45],[48.10,21.15]],places:[["Tokaj",48.12,21.41]],info:"Hongarije (46-48° NB) heeft een landklimaat met warme zomers en koude winters. De herfst is doorgaans lang en warm, waardoor met name in Tokaj, in het noordoosten, de omstandigheden goed zijn voor botrytis cinerea. Tokaji Aszú is een zoete (aszú) wijn van druiven met edele rotting, die een voor een met de hand worden geplukt. Ze gaan een paar dagen in gistende most van gewone druiven, worden geperst en vergisten opnieuw. De hoeveelheid werd vroeger gemeten in puttonyos (emmertjes): hoe meer, hoe zoeter en beter."},
+    {n:"Eger",druif:"vooral kékfrankos (blaufränkisch)",kleur:"rood",poly:[[47.98,20.20],[47.98,20.55],[47.80,20.55],[47.78,20.22]],places:[["Eger",47.90,20.37]],info:"Een van de drie gebieden waar volgens het boek goede Hongaarse rode wijnen vandaan komen, naast Sopron en Villány. Kékfrankos (blaufränkisch) is het belangrijkste ras voor rode wijn."},
+    {n:"Villány",druif:"vooral kékfrankos (blaufränkisch)",kleur:"rood",poly:[[45.93,18.28],[45.93,18.62],[45.81,18.62],[45.81,18.28]],places:[["Villány",45.87,18.45]],info:"Goede rode wijnen, in het zuiden van Hongarije. Daar zijn de winters minder koud."},
+    {n:"Sopron",druif:"vooral kékfrankos (blaufränkisch)",kleur:"rood",poly:[[47.75,16.48],[47.75,16.76],[47.61,16.76],[47.61,16.48]],places:[["Sopron",47.68,16.59]],info:"Goede rode wijnen, in het noordwesten van Hongarije. Algemene kennis, niet uit het boek: Sopron ligt pal aan de grens met het Oostenrijkse Burgenland, ook een land van blaufränkisch."},
+    {n:"Goriška Brda",druif:"wit: rebula; blauw: merlot, cabernet",kleur:"wit en rood",poly:[[46.07,13.46],[46.07,13.66],[45.96,13.66],[45.96,13.49]],info:"Het bekendste gebied in het westen van Slovenië, tegen het Italiaanse Friuli aan. Specialiteiten: wit van rebula en rood van merlot en cabernet. Aan de kust is het klimaat mediterraan. Slovenië (46° NB) maakt voor drie kwart witte wijn."},
+    {n:"Podravje",druif:"šipon (furmint), sauvignon blanc, welschriesling",kleur:"wit",stijl:"droog, fris, aromatisch",poly:[[46.75,15.55],[46.75,16.35],[46.38,16.35],[46.30,15.70],[46.45,15.50]],places:[["Maribor",46.55,15.65]],info:"In het oosten van Slovenië, grenzend aan de Oostenrijkse Steiermark. In het noorden en noordoosten heerst een landklimaat. Uit deze tamelijk koele omgeving komen droge, frisse witte wijnen van aromatische druiven als šipon (furmint) en sauvignon blanc."},
+    {n:"Kroatische kust",druif:"blauw: plavac mali",kleur:"rood en wit",poly:[[44.25,15.15],[43.55,16.15],[43.05,17.15],[42.62,18.12],[42.50,18.02],[42.90,17.00],[43.40,15.95],[44.05,15.05]],info:"In alle delen van Kroatië (43° NB) vindt wijnbouw plaats. In de gebieden aan de Adriatische Zee heerst een mediterraan klimaat. Een bekende Kroatische blauwe druif is plavac mali; algemene kennis, niet uit het boek: die groeit vooral aan de Dalmatische kust. Twee derde van de wijn is wit, een derde rood."},
+    {n:"Kroatisch binnenland",druif:"wit: graševina (welschriesling), riesling, sauvignon blanc",kleur:"vooral wit",poly:[[45.88,16.20],[45.85,19.10],[45.15,19.10],[45.20,17.20],[45.55,16.20]],info:"In het binnenland heerst een landklimaat; in het noorden is er invloed van de Alpen en is het beduidend koeler dan in het zuiden. Voor witte wijn worden onder meer graševina (welschriesling), riesling en sauvignon blanc gebruikt. Algemene kennis, niet uit het boek: het oosten van het binnenland heet Slavonië."},
+    {n:"Transsylvanië",druif:"feteasca alba en andere aromatische witte rassen",kleur:"vooral wit",stijl:"fris en aromatisch",poly:[[47.20,22.80],[47.20,25.00],[46.00,25.60],[45.70,24.00],[46.20,22.90]],info:"Het bekendste wijngebied van Roemenië (44° NB), koel en in het binnenland. Hier worden vooral frisse, aromatische witte wijnen gemaakt. Roemenië is naar oppervlakte het vijfde wijnland van Europa, ongeveer even groot als Portugal (192.000 ha). Over het geheel heerst een landklimaat, maar plaatselijk zijn er grote verschillen. Inheems: feteasca alba (wit), babeasca neagra en feteasca neagra (blauw). Ook pinot noir doet het er goed."},
+    {n:"Zwarte Zee (RO)",druif:"inheemse en internationale rassen",kleur:"wit en rood",poly:[[45.20,28.10],[45.00,29.00],[44.40,28.75],[43.75,28.60],[43.75,27.90],[44.30,27.80],[44.90,28.00]],info:"De wijngaarden van Roemenië lopen van het koele Transsylvanië tot aan de warme Zwarte Zeekust. Het landschap is bergachtig, met een enorme variatie aan bodems, van leisteen tot kalkrijke klei."},
+    {n:"Donauvlakte",druif:"mavrud, melnik, cabernet sauvignon, merlot",kleur:"vooral rood",poly:[[44.10,22.70],[43.75,25.00],[43.70,27.00],[43.30,27.00],[43.30,24.50],[43.60,22.70]],info:"In Bulgarije vond 3000 jaar geleden al wijnbouw plaats; de moderne wijnbouw begon rond 1920. De meeste wijngaarden liggen in de Donauvlakte in het noorden en in de regio aan de Zwarte Zee. Typisch Bulgaarse druiven zijn mavrud en melnik, die robuuste rode wijnen geven. Onder het communisme werden ook chardonnay, cabernet sauvignon en merlot aangeplant. Bulgarije maakt 60% rode wijn."},
+    {n:"Zwarte Zee (BG)",druif:"o.a. chardonnay, cabernet sauvignon, merlot",kleur:"wit en rood",poly:[[43.75,27.35],[43.45,28.55],[42.85,27.95],[42.30,27.80],[42.30,27.25],[43.20,27.20]],info:"De tweede belangrijke regio van Bulgarije, naast de Donauvlakte. De omstandigheden zijn er prima; wijnbouw is in Bulgarije nagenoeg overal mogelijk. Na de politieke omwenteling stagneerde de wijnbouw, maar nu komt hij weer op gang."}
+  ],
+  rivers:[{n:"Donau",line:[[48.00,17.00],[47.75,18.00],[47.79,18.90],[47.50,19.05],[46.90,18.93],[46.00,18.85],[45.25,19.30],[44.82,20.45],[44.70,21.40],[44.63,22.60],[44.20,22.65],[43.75,23.70],[43.68,24.60],[43.62,25.40],[43.85,25.95],[44.10,27.30],[44.60,27.90],[45.20,28.10],[45.30,28.70],[45.20,29.60]],at:13}],
+  lakes:[{n:"Balatonmeer",at:[46.88,17.75],poly:[[47.05,18.17],[46.98,18.05],[46.88,17.85],[46.78,17.60],[46.72,17.27],[46.75,17.24],[46.82,17.55],[46.92,17.80],[47.02,18.02]]}],
+  mounts:[["Karpaten",45.9,25.2,2.0,.5],["Alpen",46.4,14.2,.7,.25]],
+  soil:[["leisteen tot kalkrijke klei",45.6,24.6]],
+  layers:{
+    riv:["Water","De Donau stroomt door Hongarije en vormt de grens tussen Roemenië en Bulgarije; de meeste Bulgaarse wijngaarden liggen in de Donauvlakte. Bij het Balatonmeer in Hongarije zijn de winters minder koud. Kroatië en Slovenië liggen aan de Adriatische Zee, Roemenië en Bulgarije aan de Zwarte Zee."],
+    berg:["Bergen","Het noorden van Kroatië wordt beïnvloed door de Alpen en is daardoor beduidend koeler dan het zuiden. Het Roemeense landschap is bergachtig (de Karpaten; die naam is algemene kennis)."],
+    lig:["Klimaat","Hongarije ligt op 46-48° NB, Slovenië op 46°, Roemenië op 44° en Kroatië op 43° NB. In het binnenland heerst overal een landklimaat met warme zomers en koude winters; aan de Adriatische Zee is het mediterraan. In Hongarije is de herfst doorgaans lang en warm."],
+    bodem:["Bodem","Hongarije heeft geschikte bodems; Roemenië een enorme variatie, van leisteen tot kalkrijke klei. Over de andere landen zegt het boek niets over de bodem."]
+  },
+  sections:[]
+},
+Griekenland:{title:"Griekenland",box:[34.8,19.4,41.8,28.4],grens:"De gebieden zijn met de hand ingetekend en dus bij benadering.",
+  src:"Bron: boek p. 172-173.",
+  regions:[
+    {n:"Náoussa",druif:"xynomavro",kleur:"rood",stijl:"houtgerijpt, met de nodige tannine en zuren; lichtere rode wijnen van zanderige bodem",poly:[[40.72,21.98],[40.72,22.18],[40.58,22.22],[40.54,22.05],[40.60,21.95]],places:[["Náoussa",40.63,22.07]],info:"Náoussa ligt in Macedonië, in het ruige noorden van Griekenland. Het bergachtige noorden heeft een continentaal Balkanklimaat met koude winters. De wijngaarden liggen op hellingen tussen 200 en 500 meter hoog en hebben kalkrijke kleibodems. De houtgerijpte rode wijnen van xynomavro behoren tot de beste van Griekenland en worden weleens vergeleken met nebbiolo uit Piemonte. De lichtere rode wijnen komen van wijngaarden met een zanderige bodem."},
+    {n:"Neméa",druif:"agiorgitiko",kleur:"rood",stijl:"krachtig en vol, of licht en fruitig als primeur (macération semi-carbonique)",poly:[[37.92,22.50],[37.93,22.75],[37.80,22.80],[37.70,22.62],[37.75,22.47]],places:[["Neméa",37.82,22.66]],info:"Een andere Griekse topper voor rood, op de Peloponnesos, met de druif agiorgitiko. Op traditionele wijze worden er krachtige, volle wijnen gemaakt, maar ook een lichte, fruitige soort in de stijl van een primeurwijn, met de methode macération semi-carbonique. In het grootste deel van Griekenland heerst een mediterraan klimaat; de beste wijngaarden liggen op koele hoogte."},
+    {n:"Sámos",druif:"muscat",kleur:"zoet wit",stijl:"rijk en zoet, in de stijl van vin doux naturel; Sámos Nectar onversterkt",poly:[[37.80,26.58],[37.79,26.75],[37.76,26.97],[37.70,27.06],[37.66,26.95],[37.69,26.75],[37.67,26.60],[37.73,26.56]],info:"Het eiland Sámos ligt vlak voor de kust van Turkije en is gespecialiseerd in rijke, zoete wijnen van muscat, gemaakt in de stijl van vin doux naturel. Sámos Nectar is een onversterkte zoete wijn, waarvoor de druiven eerst in de zon worden gedroogd."},
+    {n:"Santorini",druif:"assyrtiko",kleur:"wit",stijl:"uitgesproken mineraal",poly:[[36.47,25.40],[36.46,25.44],[36.40,25.49],[36.35,25.48],[36.34,25.42],[36.38,25.40],[36.43,25.42]],info:"Misschien wel de meest intrigerende Griekse wijn: de witte van het winderige vulkaaneiland Santorini, met zijn zwarte bodem. Hij komt van de assyrtikodruif, die heel laag bij de grond groeit en een uitgesproken minerale smaak geeft. Op sommige eilanden speelt de harde wind een rol."}
+  ],
+  rivers:[],
+  mounts:[["Bergachtig noorden",40.4,21.6,1.6,.4]],
+  soil:[["kalkrijke klei",40.63,22.07],["zwarte vulkaanbodem",36.40,25.44]],
+  layers:{
+    riv:["Zee","Niet alleen de vele Griekse eilanden, maar ook het vasteland is omgeven door zeeën. In laaggelegen kustzones kan het erg warm worden. Op sommige eilanden, zoals Santorini, speelt de harde wind een rol."],
+    berg:["Bergen","Het bergachtige noorden, met Náoussa, heeft een continentaal Balkanklimaat met koude winters. De beste wijngaarden liggen op koele hoogte; in Náoussa tussen 200 en 500 meter."],
+    lig:["Klimaat","Griekenland ligt op 35-41° NB. In het grootste deel heerst een mediterraan klimaat. De inheemse druivenrassen zijn bestand tegen warmte en droogte; internationale rassen als chardonnay, cabernet en merlot hebben weinig succes."],
+    bodem:["Bodem","Náoussa: kalkrijke kleibodems, met zanderige bodems voor de lichtere rode wijnen. Santorini: zwarte vulkanische bodem."]
+  },
+  sections:[]
+},
+Benelux:{title:"Nederland, België en Luxemburg",box:[49.3,2.4,53.6,7.3],grens:"De gebieden zijn met de hand ingetekend en dus bij benadering.",
+  src:"Bron: boek p. 174-175. Het boek noemt de andere Nederlandse BOB's niet bij naam; daarom staan alleen de Belgische BOB's, Maasvallei Limburg en de Luxemburgse Moezel op de kaart.",
+  regions:[
+    {n:"Maasvallei Limburg",druif:"riesling, auxerrois, müller-thurgau, pinot gris; ook regent, solaris",kleur:"wit, rood, mousserend",poly:[[51.05,5.55],[51.00,5.90],[50.75,5.98],[50.72,5.62],[50.88,5.55]],places:[["Maastricht",50.85,5.69]],info:"De oudste van de 9 Nederlandse BOB's (2024), en grensoverschrijdend: ook in Belgisch Limburg. In Nederland begon de wijnbouw rond 1975 in Zuid-Limburg; Limburg heeft nog altijd de grootste aanplant. Klassieke druiven lukken eigenlijk alleen in Zuid-Limburg: rondom Maastricht is het landschap heuvelachtig, met wijngaarden op zuidelijke hellingen langs riviertjes, goed beschermd tegen koude wind. De bodem bestaat uit kalkrijke mergel en löss met een goede drainage. Door het korte groeiseizoen is chaptalisatie vaak nodig."},
+    {n:"Hageland",druif:"chardonnay, müller-thurgau, pinot blanc, pinot gris",kleur:"wit, mousserend",poly:[[51.00,4.75],[51.00,5.10],[50.82,5.12],[50.80,4.75]],info:"Een van de 7 Belgische BOB's, in Vlaanderen. Het klimaat is vergelijkbaar met dat van Zuid-Limburg. Anders dan in Nederland bestaat de aanplant vooral uit edele rassen; chardonnay is tegenwoordig het belangrijkst."},
+    {n:"Haspengouw",druif:"chardonnay, müller-thurgau, pinot blanc, pinot gris",kleur:"wit, mousserend",poly:[[50.82,5.05],[50.85,5.45],[50.65,5.55],[50.62,5.10]],info:"Belgische BOB in Vlaanderen. Een Belgische specialiteit is mousserende wijn (schuimwijn), gemaakt volgens de traditionele methode."},
+    {n:"Heuvelland",druif:"chardonnay, müller-thurgau, pinot blanc, pinot gris",kleur:"wit, mousserend",poly:[[50.82,2.72],[50.82,2.95],[50.72,2.95],[50.72,2.72]],info:"Belgische BOB in Vlaanderen. België is het kleinste wijnland van de Benelux (50° NB, 200 ha)."},
+    {n:"Côtes de Sambre et Meuse",druif:"chardonnay, müller-thurgau, pinot blanc, pinot gris",kleur:"wit, mousserend",poly:[[50.55,4.40],[50.55,5.20],[50.25,5.10],[50.20,4.75],[50.35,4.40]],info:"De Belgische BOB in Wallonië. Naast de 5 gebieds-BOB's heeft België nog 2 BOB's voor mousserende wijn."},
+    {n:"Moselle Luxembourgeoise",druif:"elbling, rivaner (müller-thurgau), auxerrois, pinot gris, riesling",kleur:"wit, mousserend",poly:[[49.72,6.47],[49.70,6.53],[49.55,6.45],[49.45,6.40],[49.46,6.33],[49.57,6.37],[49.68,6.43]],places:[["Remich",49.545,6.367],["Grevenmacher",49.68,6.44]],info:"De enige herkomstaanduiding van Luxemburg (49° NB): alle wijnen vallen onder de AOP Moselle Luxembourgeoise. Verreweg het grootste deel van de 1200 ha ligt in een aaneengesloten lint langs de linkeroever van de Moezel. Het klimaat is koeler en de hellingen zijn minder steil dan in de Duitse Mosel, waardoor de druiven soms moeite hebben om volledig te rijpen. De meeste wijnen dragen de Marque Nationale (Vin Classé, Premier Cru, Grand Premier Cru), op basis van punten na een keuring. Voor Crémant de Luxembourg is de tweede vergisting op fles verplicht."}
+  ],
+  rivers:[{n:"Maas",line:[[50.15,4.85],[50.47,4.87],[50.63,5.57],[50.85,5.69],[51.15,5.85],[51.50,5.90],[51.75,5.60],[51.80,5.00]],at:3},{n:"Moezel",line:[[49.47,6.37],[49.62,6.42],[49.71,6.49],[49.75,6.64]],at:1}],
+  mounts:[["Heuvels rond Maastricht",50.80,5.80,.3,.12]],
+  soil:[["kalkrijke mergel en löss",50.82,5.78]],
+  layers:{
+    riv:["Water","In Zuid-Limburg liggen de wijngaarden op zuidhellingen langs riviertjes, goed beschermd tegen koude wind. In Luxemburg ligt bijna alle wijngaard in een lint langs de linkeroever van de Moezel."],
+    berg:["Heuvels","Rondom Maastricht is het landschap heuvelachtig; de zuidelijke hellingen vangen meer zon. De Luxemburgse hellingen zijn minder steil dan die in de Duitse Mosel."],
+    lig:["Klimaat","Nederland ligt rond 52° NB, België rond 50° en Luxemburg rond 49° NB. Het Nederlandse klimaat is op de meeste plaatsen te koel en vochtig voor klassieke druivenrassen; dat lukt eigenlijk alleen in Zuid-Limburg. Het Belgische klimaat is vergelijkbaar met dat van Zuid-Limburg. Schimmel en rot voorkomen is essentieel."],
+    bodem:["Bodem","Zuid-Limburg: kalkrijke mergel en löss met een goede drainage. Over de bodems in België en Luxemburg zegt het boek niets."]
+  },
+  sections:[]
 }};
 const LAB={Niederösterreich:[48.08,15.5],Wien:[48.27,16.37],Burgenland:[47.12,16.3],Steiermark:[47.18,15.5],Wachau:[48.35,15.36],Kremstal:[48.48,15.56],Kamptal:[48.55,15.72],Weinviertel:[48.62,16.3],Carnuntum:[48.0,16.9],Neusiedlersee:[47.87,17.02],Mittelburgenland:[47.5,16.47],Südsteiermark:[46.7,15.5],Valais:[46.17,7.6],Vaud:[46.6,6.55],Ticino:[46.08,9.2],Ahr:[50.68,7.1],Mosel:[50.02,6.7],Nahe:[49.7,7.6],Rheingau:[50.06,8.1],Rheinhessen:[49.76,8.19],Pfalz:[49.25,8.17],Baden:[48.45,8.0],Franken:[50.02,10.12]};
 let geo={land:"Duitsland",c:null,z:6,wpx:360,lastMove:0,sel:null,layer:"riv",quiz:null,prov:null,noTiles:false,credit:false,sec:"mosel"};
@@ -1835,7 +1980,7 @@ function vGeo(){
   ${(()=>{const id=r&&climOf(D,r);if(!id)return "";const C=CLIM[id];return `<section class="card"><h3>Klimaat in cijfers: ${h(r.n)}</h3><p class="small muted">Van internet, niet uit het boek: normalen 1991–2020 van weerstation ${h(C[0])} (bron: ${h(C[1])}, via Wikipedia). Een station in de buurt; in de wijngaarden kan het iets anders zijn.</p>${climChart(id,climCmp)}<label class="small">Vergelijk met <select id="climcmp"><option value="">(geen)</option>${Object.keys(CLIM).filter(k=>k!==id).map(k=>`<option value="${k}"${k===climCmp?" selected":""}>${h(CLIM[k][0])}</option>`).join("")}</select></label></section>`})()}
   <section class="card"><h3>Wat bepaalt het klimaat in ${h(D.title)}?</h3><div class="row">${Object.entries(D.layers).map(([k,l])=>`<button class="chip" data-act="g-layer" data-id="${k}" aria-pressed="${geo.layer===k}">${l[0]}</button>`).join("")}</div>
     ${geo.layer?`<p class="note">${h(D.layers[geo.layer][1])}</p>`:""}</section>
-  ${(()=>{const own=r&&secOf(D,r),id=(!geo.secPick&&own)||(D.sections.some(x=>x[0]===geo.sec)?geo.sec:D.sections[0][0]),S=section(id),nm=D.sections.find(x=>x[0]===id)[1];
+  ${(()=>{if(!D.sections.length)return "";const own=r&&secOf(D,r),id=(!geo.secPick&&own)||(D.sections.some(x=>x[0]===geo.sec)?geo.sec:D.sections[0][0]),S=section(id),nm=D.sections.find(x=>x[0]===id)[1];
     return `<section class="card"><h3>${own&&id===own?"Doorsnede bij "+h(r.n):"Doorsneden"}</h3>${r&&!own?`<p class="small muted">Van ${h(r.n)} is (nog) geen doorsnede. Wel van:</p>`:""}
     <div class="row">${D.sections.map(x=>`<button class="chip" data-act="g-sec" data-id="${x[0]}" aria-pressed="${id===x[0]}">${x[1]}</button>`).join("")}</div>${S[0]}<p class="small">${h(S[1])}</p></section>`})()}
   <p class="src">${h(D.src)}</p>`}`;
@@ -1871,7 +2016,7 @@ view.addEventListener("click",e=>{
     if(qs.length){quiz={qs,i:0,pick:null,log:[],fromWrong:true};tab="overhoren";try{location.hash=tab}catch(e){}scroll=true}}
   else if(a==="q-exam"){quiz=examQuiz();scroll=true}
   else if(a==="s-grape"){tab="opbouwen";build=null;gview=d.n;zoek="";try{location.hash=tab}catch(e){}scroll=true}
-  else if(a==="s-region"){const [land,n]=d.n.split("|"),D=GEO[land],r=all(D).find(x=>x.n===n);tab="kaart";zoek="";geo.land=land;geo.quiz=null;geo.sel=n;geo.sec=D.sections[0][0];
+  else if(a==="s-region"){const [land,n]=d.n.split("|"),D=GEO[land],r=all(D).find(x=>x.n===n);tab="kaart";zoek="";geo.land=land;geo.quiz=null;geo.sel=n;geo.sec=(D.sections[0]||[])[0]||null;
     if(r){fitBox(regionBox(r));geo.z=Math.max(geo.z,(r.zl||D.zdeep||ZPLACES)+.2)}try{location.hash=tab}catch(e){}scroll=true}
   else if(a==="theme"){store.theme=d.id;save();applyTheme()}
   else if(a==="bk-make"){const blob=new Blob([JSON.stringify(store)],{type:"application/json"}),u=URL.createObjectURL(blob),el=document.createElement("a");
@@ -1909,7 +2054,7 @@ view.addEventListener("click",e=>{
   else if(a==="g-style"){store.mapStyle=d.id;save();geo.prov=MSTYLE[d.id][1];geo.noTiles=false;geo.credit=false}
   else if(a==="g-wine"){if(Date.now()-geo.lastMove<450)return;geo.wine=geo.wine===d.id?null:d.id}
   else if(a==="g-mine"){geo.mine=geo.mine===false;geo.wine=null}
-  else if(a==="g-land"){if(geo.land!==d.n){geo.land=d.n;geo.c=null;geo.sel=null;geo.quiz=null;geo.sec=GEO[d.n].sections[0][0]}}
+  else if(a==="g-land"){if(geo.land!==d.n){geo.land=d.n;geo.c=null;geo.sel=null;geo.quiz=null;geo.sec=(GEO[d.n].sections[0]||[])[0]||null}}
   else if(a==="g-grape"){if(Date.now()-geo.lastMove<450)return;tab="opbouwen";build=null;gview=d.n;try{location.hash=tab}catch(e){}scroll=true}
   else if(a==="g-plus"){zoomBy(2);return}
   else if(a==="g-minus"){zoomBy(.5);return}
@@ -1922,7 +2067,7 @@ view.addEventListener("click",e=>{
   else if(a==="l-quiz"){learn.q=learn.q?null:newLabQ(null);learn.part=null}
   else if(a==="l-part"){const i=+d.i,L=LABELS.find(x=>x.id===learn.lab);if(learn.q){const q=learn.q;if(i===q.i){q.good++;learn.q=newLabQ(q);learn.q.msg="Goed!";learn.q.hit=i}else{q.msg="Dat is "+L.parts[i][0]+". Nog eens.";q.hit=null}}else learn.part=learn.part===i?null:i}
   else if(a==="g-nogrape"){geo.grape=null}
-  else if(a==="g-showgrape"){const g=byName(d.n),R=grapeRegs(g),ls=Object.keys(R);geo.grape=g.n;const l=R[geo.land]?geo.land:ls.sort((x,y)=>R[y].length-R[x].length)[0];if(l&&l!==geo.land){geo.land=l;geo.sel=null;geo.quiz=null;geo.sec=GEO[l].sections[0][0]}geo.c=null;tab="kaart";try{location.hash=tab}catch(e){}scroll=true}
+  else if(a==="g-showgrape"){const g=byName(d.n),R=grapeRegs(g),ls=Object.keys(R);geo.grape=g.n;const l=R[geo.land]?geo.land:ls.sort((x,y)=>R[y].length-R[x].length)[0];if(l&&l!==geo.land){geo.land=l;geo.sel=null;geo.quiz=null;geo.sec=(GEO[l].sections[0]||[])[0]||null}geo.c=null;tab="kaart";try{location.hash=tab}catch(e){}scroll=true}
   else if(a==="reset")confirmReset=true;
   else if(a==="reset-no")confirmReset=false;
   else if(a==="reset-yes"){const t=store.theme;store=fresh();store.theme=t;save();confirmReset=false;bkMsg=""}
@@ -1930,7 +2075,7 @@ view.addEventListener("click",e=>{
 });
 // Back-up terugzetten uit een bestand.
 view.addEventListener("input",e=>{if(e.target.id==="glzoek"){learn.gl=e.target.value;const p=e.target.selectionStart;render();const n=document.getElementById("glzoek");if(n){n.focus();try{n.setSelectionRange(p,p)}catch(x){}}}});
-view.addEventListener("change",e=>{if(e.target.id==="grapesel"){geo.grape=e.target.value||null;if(geo.grape){const R=grapeRegs(byName(geo.grape)),ls=Object.keys(R).sort((x,y)=>R[y].length-R[x].length);if(!R[geo.land]&&ls[0]){geo.land=ls[0];geo.sel=null;geo.sec=GEO[ls[0]].sections[0][0];geo.c=null}}render();return}if(e.target.id==="climcmp"){climCmp=e.target.value;render();return}if(e.target.id!=="bkfile")return;const f=e.target.files&&e.target.files[0];if(!f)return;
+view.addEventListener("change",e=>{if(e.target.id==="grapesel"){geo.grape=e.target.value||null;if(geo.grape){const R=grapeRegs(byName(geo.grape)),ls=Object.keys(R).sort((x,y)=>R[y].length-R[x].length);if(!R[geo.land]&&ls[0]){geo.land=ls[0];geo.sel=null;geo.sec=(GEO[ls[0]].sections[0]||[])[0]||null;geo.c=null}}render();return}if(e.target.id==="climcmp"){climCmp=e.target.value;render();return}if(e.target.id!=="bkfile")return;const f=e.target.files&&e.target.files[0];if(!f)return;
   f.text().then(v=>{const o=JSON.parse(v);if(!o||typeof o!=="object"||!o.stats)throw 0;store=Object.assign(fresh(),o);save();applyTheme();bkMsg="Teruggezet uit "+f.name+". Je voortgang is weer zoals in de back-up."})
    .catch(()=>{bkMsg="Dit bestand is geen back-up van de Wijnbrevet Trainer. Kies het bestand dat begint met wijnbrevet-backup."}).finally(render)});
 view.addEventListener("input",e=>{if(e.target.id==="zoek"){zoek=e.target.value;const r=document.getElementById("zoekres");if(r)r.innerHTML=hitsHTML(zoek)}});
