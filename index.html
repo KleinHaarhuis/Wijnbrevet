@@ -1116,7 +1116,7 @@ function loadCellar(){
       q.onsuccess=()=>{db.close();
         const L=(q.result||[]).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).map(w=>{const loc=w.info&&w.info.locatie,la=loc?+loc.lat:NaN,lo=loc?+loc.lon:NaN,ph=(w.photos&&w.photos[0])||w.photo||null;
           return {id:String(w.id),n:w.naam||"Onbekende wijn",prod:w.producent||"",jaar:w.jaar||"",land:w.land||"",regio:w.regio||"",app:w.appellatie||"",type:w.type||"",dr:(w.druiven||[]).map(String),
-            list:w.list==="proberen"?"proberen":"gedronken",score:(w.mijn&&+w.mijn.score)||0,loc:isFinite(la)&&isFinite(lo)&&(la||lo)?[la,lo]:null,ph:ph instanceof Blob?ph:null,
+            list:w.list==="proberen"||w.list==="kelder"?"proberen":"gedronken",score:(w.mijn&&+w.mijn.score)||0,loc:isFinite(la)&&isFinite(lo)&&(la||lo)?[la,lo]:null,ph:ph instanceof Blob?ph:null,
             t:plain([w.naam,w.regio,w.appellatie].join(" ")),l:plain(w.land||""),d:(w.druiven||[]).map(plain)}});
         const sig=L.map(w=>[w.id,w.n,w.list,w.score,w.dr.join("+"),w.loc?w.loc.join(","):""].join("|")).join(";");
         if(sig!==cellarSig){cellarSig=sig;cellar=L;const busy=(tab==="overhoren"&&quiz)||(tab==="opbouwen"&&build)||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));if(!busy)render()}
