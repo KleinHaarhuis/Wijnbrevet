@@ -81,6 +81,7 @@ button:focus-visible{outline:3px solid var(--leaf);outline-offset:2px}
 .pill.no{background:var(--bad-bg);color:var(--bad)}
 .pill.half{background:var(--warn-bg);color:var(--warn)}
 .pill.code{background:transparent;border:1px solid var(--line);color:var(--muted);font-variant-numeric:tabular-nums}
+.pfw{border-top:1px solid var(--line, rgba(0,0,0,.1));padding:10px 0}.pfw summary{cursor:pointer;list-style:none}.pfw p{margin:8px 0}
 .wrow{display:flex;gap:10px;align-items:center;border-top:1px solid var(--line);padding:9px 0}
 .wrow img{width:38px;height:50px;object-fit:cover;border-radius:6px;flex:none;background:var(--paper)}
 .wrow>div{flex:1;min-width:0;display:flex;flex-direction:column}.wrow .swatch{margin:0 14px}
@@ -1083,7 +1084,7 @@ function vTaste(){
     <p class="muted small">De wijnen waaruit SDEN de proefglazen kiest. Vink af wat je bewust geproefd hebt. Wat in Mijn Wijnboek staat, wordt vanzelf afgevinkt.</p>
     ${LIST.map(grp=>`<div><h3>${grp[0]}</h3>${grp[1].map(w=>{const i=idx++,m=proefMatch(i),on=!!store.tasted[i]||m.length>0;return `<button class="check" data-act="tasted" data-i="${i}" aria-pressed="${on}"><i>${on?"✓":""}</i><span>${h(w)}${m.length?`<small>Mijn Wijnboek: ${h(m.slice(0,2).map(x=>x.n).join(", "))}${m.length>2?" en "+(m.length-2)+" meer":""}</small>`:""}</span></button>`}).join("")}</div>`).join("")}
     ${cellar.length?`<p class="src">De wijnen uit Mijn Wijnboek zijn automatisch herkend op land, streek, druif en type. Dat is een schatting; je kunt ook zelf afvinken.</p>`:""}
-  </section>`;
+  </section>${pfCard()}`;
 }
 
 function flagText(){return store.flags.map((f,i)=>`${i+1}. ${f.q}\n   In de app: ${f.a}\n   Bron: ${f.src}`).join("\n")}
@@ -1336,13 +1337,27 @@ function loadCellar(){
         const L=(q.result||[]).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).map(w=>{const loc=w.info&&w.info.locatie,la=loc?+loc.lat:NaN,lo=loc?+loc.lon:NaN,ph=(w.photos&&w.photos[0])||w.photo||null;
           return {id:String(w.id),n:w.naam||"Onbekende wijn",prod:w.producent||"",jaar:w.jaar||"",land:w.land||"",regio:w.regio||"",app:w.appellatie||"",type:w.type||"",dr:(w.druiven||[]).map(String),
             list:w.list==="proberen"||w.list==="kelder"?"proberen":"gedronken",score:(w.mijn&&+w.mijn.score)||0,loc:isFinite(la)&&isFinite(lo)&&(la||lo)?[la,lo]:null,ph:ph instanceof Blob?ph:null,
-            t:plain([w.naam,w.regio,w.appellatie].join(" ")),l:plain(w.land||""),d:(w.druiven||[]).map(plain)}});
-        const sig=L.map(w=>[w.id,w.n,w.list,w.score,w.dr.join("+"),w.loc?w.loc.join(","):""].join("|")).join(";");
+            t:plain([w.naam,w.regio,w.appellatie].join(" ")),l:plain(w.land||""),d:(w.druiven||[]).map(plain),pf:pfOf(w.proef)}});
+        const sig=L.map(w=>[w.id,w.n,w.list,w.score,w.dr.join("+"),w.loc?w.loc.join(","):"",w.pf?w.pf.t+w.pf.datum:""].join("|")).join(";");
         if(sig!==cellarSig){cellarSig=sig;cellar=L;const busy=(tab==="overhoren"&&quiz)||(tab==="opbouwen"&&build)||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName));if(!busy)render()}
       }};
   }catch(e){}
 }
 const drunk=()=>cellar.filter(w=>w.list==="gedronken");
+// Proefformulier uit Mijn Wijnboek (veld proef): tekst en de belangrijkste structuurkenmerken.
+function pfOf(p){if(!p||typeof p!=="object")return null;const A=[...(Array.isArray(p.aroma)?p.aroma:[]),...String(p.aromaEigen||"").split(",").map(x=>x.trim()).filter(Boolean)].map(String);
+  const k=x=>typeof x==="string"?x:"";const r={t:k(p.tekst),datum:k(p.datum),kleur:k(p.kleur),ar:A,zoet:k(p.zoet),zuur:k(p.zuur)+(p.zuurst?" ("+k(p.zuurst)+")":""),tan:k(p.tan),alc:k(p.alc),mond:k(p.mond),afdr:k(p.afdr),ontw:k(p.ontw),oordeel:k(p.oordeel)};
+  return r.t||A.length||r.kleur||r.zuur?r:null}
+function pfCard(){
+  const W=drunk().filter(w=>w.pf);if(!cellar.length)return "";
+  const names=LIST.flatMap(g=>g[1]),exOf=w=>names.filter((n,i)=>proefMatch(i).some(x=>x.id===w.id));
+  return `<section class="card"><div class="row between"><h2>Mijn proefformulieren</h2><span class="muted small">${W.length}</span></div>
+    ${W.length?W.slice(0,8).map(w=>{const p=w.pf,ex=exOf(w),S=[["Kleur",p.kleur],["Aroma's",p.ar.join(", ")],["Zoet",p.zoet],["Zuur",p.zuur],["Tannine",p.tan],["Alcohol",p.alc],["Mondgevoel",p.mond],["Afdronk",p.afdr],["Ontwikkeling",p.ontw],["Oordeel",p.oordeel]].filter(x=>x[1]&&x[1].trim());
+      return `<details class="pfw"><summary><strong>${h(w.n)}</strong> <span class="small muted">${h([w.jaar,p.datum&&new Date(p.datum).toLocaleDateString("nl-NL",{day:"numeric",month:"short"})].filter(Boolean).join(" · "))}</span>${ex.length?`<br><span class="small">Examenwijn: ${h(ex.slice(0,2).join("; "))}</span>`:""}</summary>
+        ${p.t?`<p>${h(p.t)}</p>`:""}${S.length?`<dl>${S.map(x=>`<dt>${x[0]}</dt><dd>${h(x[1])}</dd>`).join("")}</dl>`:""}</details>`}).join("")+(W.length>8?`<p class="small muted">En nog ${W.length-8} in Mijn Wijnboek.</p>`:"")
+    :`<p class="muted small">Vul in Mijn Wijnboek bij een gedronken wijn het proefformulier in; je ziet het dan hier terug, met de examenwijn waar hij bij hoort.</p>`}
+  </section>`;
+}
 // Welke wijn uit Mijn Wijnboek past bij welke regel van de SDEN-proeflijst? Op volgorde van LIST. Dit is een schatting op land, streek, druif en type.
 const PM=(()=>{const R=(w,re)=>re.test(w.t),L=(w,re)=>re.test(w.l),D=(w,re)=>w.d.some(x=>re.test(x)),T=(w,t)=>w.type===t,sp=/crianza|reserva/;
   return [
